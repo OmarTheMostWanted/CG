@@ -1,0 +1,2 @@
+/usr/bin/ar qc libSolarSystemLib.a  CMakeFiles/SolarSystemLib.dir/src/solar_system.cpp.o
+/usr/bin/ranlib libSolarSystemLib.a

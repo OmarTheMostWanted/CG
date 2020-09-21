@@ -2,5 +2,25 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/assimp-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/catch2-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/fmt-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/glad-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/glfw-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/glm-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 1/cmake-build-debug/_deps/msgsl-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/catch2-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/fmt-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/glfw-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/glm-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/gsllite-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/Assignment 2/cmake-build-debug/_deps/stb-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/linear_algebra_exercise/cmake-build-debug/_deps/fmt-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/linear_algebra_exercise/cmake-build-debug/_deps/glfw-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/linear_algebra_exercise/cmake-build-debug/_deps/glm-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/linear_algebra_exercise/cmake-build-debug/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Code/C++/linear_algebra_exercise/cmake-build-debug/_deps/msgsl-src" vcs="Git" />
   </component>
 </project>

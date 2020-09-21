@@ -1,0 +1,2 @@
+/usr/bin/ar qc libRobotArmLib.a  CMakeFiles/RobotArmLib.dir/src/robot_arm.cpp.o
+/usr/bin/ranlib libRobotArmLib.a

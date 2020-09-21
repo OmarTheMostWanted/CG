@@ -24,9 +24,10 @@
 *.lai
 *.la
 *.a
-*.lib
+*.lib7
 
 # Executables
 *.exe
 *.out
 *.app
+

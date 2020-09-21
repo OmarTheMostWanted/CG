@@ -1,0 +1,2 @@
+/usr/bin/ar qc libCGFramework.a  CMakeFiles/CGFramework.dir/src/trackball.cpp.o CMakeFiles/CGFramework.dir/src/window.cpp.o CMakeFiles/CGFramework.dir/src/shader.cpp.o CMakeFiles/CGFramework.dir/src/imgui_impl_glfw.cpp.o CMakeFiles/CGFramework.dir/src/imgui_impl_opengl2.cpp.o CMakeFiles/CGFramework.dir/src/imgui_impl_opengl3.cpp.o
+/usr/bin/ranlib libCGFramework.a

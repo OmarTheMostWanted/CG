@@ -56,6 +56,18 @@ int main()
         std::cout << "Exercise 2: Incorrect for this specific test case" << std::endl;
     }
 
+    Tree r;
+    r.value = 0;
+    Tree child1;
+    child1.value = 1;
+    Tree child2;
+    child2.value = 2;
+
+    r.children.push_back(child1);
+    r.children.push_back(child2);
+
+    countTree(r  , false);
+
     // If you want to test your implementation of the linear algebra exercises then you can put them here.
     // Use the equalsFloats function to compare two floating point numbers with an epsilon to prevent tests
     // from failing because of small rounding errors.
