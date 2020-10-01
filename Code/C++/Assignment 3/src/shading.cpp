@@ -44,25 +44,49 @@ glm::vec3 debugColor(const ShadingData& shadingData, const glm::vec3& vertexPos,
 // Standard lambertian shading: Kd * dot(N,L), clamped to zero when negative. Where L is the light vector.
 glm::vec3 diffuseOnly(const ShadingData& shadingData, const glm::vec3& vertexPos, const glm::vec3& normal, const glm::vec3& lightPos)
 {
-    return glm::vec3(0, 0, 1);
+    auto cosAngle = glm::dot(normal, glm::normalize(lightPos - vertexPos));
+    if (cosAngle > 0) {
+        auto res = shadingData.Kd * cosAngle;
+        return res;
+    } else return glm::vec3(0);
 }
 
 // Phong (!) Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
 // Follow the course, only calculate Ks pow(dot(V,R),shininess), where V is the view vector and R is the Reflection vector of the light (like in pool billard computed from the LightPos, vertexPos and normal).
 // When computing specularities like this, verify that the light is on the right side of the surface, with respect to the normal
 // E.g., for a plane, the light source below the plane cannot cast light on the top, hence, there can also not be any specularity.
-glm::vec3 phongSpecularOnly(const ShadingData& shadingData, const glm::vec3& vertexPos, const glm::vec3& normal, const glm::vec3& lightPos, const glm::vec3& cameraPos)
-{
-    return glm::vec3(0, 1, 0);
+glm::vec3 phongSpecularOnly(const ShadingData &shadingData, const glm::vec3 &vertexPos, const glm::vec3 &normal,
+                            const glm::vec3 &lightPos, const glm::vec3 &cameraPos) {
+
+    float cosNormalLight = glm::dot(glm::normalize(lightPos - vertexPos), normal);
+
+    if (cosNormalLight < 0) {
+        return glm::vec3(0);
+    }
+    auto lightVec = glm::normalize(vertexPos - lightPos);
+    auto camVec = glm::normalize(cameraPos - vertexPos);
+    auto normalN = glm::normalize(normal);
+    auto reflectedLight = glm::normalize(lightVec - (2 * (glm::dot(lightVec, normalN))) * normalN);
+    return shadingData.Ks * glm::pow(glm::dot(reflectedLight, camVec), shadingData.shininess);
 }
 
 // Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
 // Be careful!!! The pseudo code does some additional modifications to the formula seen in the course.
 // Follow the course version and calculate ONLY Ks * pow(dot(N,H), shininess). The definition of H is given on the page above and in the course.
 // The same test as before should be used.
-glm::vec3 blinnPhongSpecularOnly(const ShadingData& shadingData, const glm::vec3& vertexPos, const glm::vec3& normal, const glm::vec3& lightPos, const glm::vec3& cameraPos)
-{
-    return glm::vec3(0, 0, 1);
+glm::vec3 blinnPhongSpecularOnly(const ShadingData &shadingData, const glm::vec3 &vertexPos, const glm::vec3 &normal,
+                                 const glm::vec3 &lightPos, const glm::vec3 &cameraPos) {
+    float cosNormalLight = glm::dot(glm::normalize(lightPos - vertexPos), normal);
+    if (cosNormalLight < 0) {
+        return glm::vec3(0);
+    }
+    auto lightVec = (lightPos - vertexPos);
+    auto camVec = (cameraPos - vertexPos);
+    auto normalN = glm::normalize(normal);
+//    auto halfVector = (lightVec + camVec)/glm::length((lightVec , camVec));
+    auto halfVector = glm::normalize(lightVec + camVec);
+
+    return shadingData.Ks * glm::pow(glm::dot(halfVector, normalN), shadingData.shininess);
 }
 
 // Diffuse Toon Shading.
@@ -73,15 +97,51 @@ glm::vec3 blinnPhongSpecularOnly(const ShadingData& shadingData, const glm::vec3
 // Let c(0)=0, c(1) ...c(N), c(N+1)=Kd be the boundary values of these intervals.
 // For a value v in [c(i), c(i+1)), the function should return (c(i)+c(i+1))/2.
 // For v=Kd, return (c(N)+c(N+1))/2, else 0.
-glm::vec3 toonShadingNoSpecular(const ShadingData& shadingData, const glm::vec3& vertexPos, const glm::vec3& normal, const glm::vec3& lightPos)
-{
-    return glm::vec3(0.5f, 0.5f, 0.0f);
+glm::vec3 toonShadingNoSpecular(const ShadingData &shadingData, const glm::vec3 &vertexPos, const glm::vec3 &normal,
+                                const glm::vec3 &lightPos) {
+    auto cosAngle = glm::dot(glm::normalize(normal), glm::normalize(lightPos - vertexPos));
+
+//    std::cout << "angle cos " << cosAngle << std::endl;
+
+    if (cosAngle >= 0) {
+
+        float stepSize = 1 / (float) shadingData.toonDiscretize;
+
+//        std::cout << "stepSize " << stepSize << std::endl;
+
+
+        float current = 0;
+        for (float i = stepSize; i <= 1;) {
+
+//            std::cout << "i  " << i << std::endl;
+            if (current <= cosAngle && cosAngle <= i) {
+                return shadingData.Kd * ((current + i) / 2);
+            }
+            current = i;
+            i += stepSize;
+        }
+    } else return glm::vec3(0);
 }
 
 // Specular Toon shading.
 // The goal is to add white highlights. If the Blinn-Phong Specularity (without multiplying by Ks!) has a value larger or equal to ToonSpecularThreshold,
 //  then return white (vec3(1)), else return black.
-glm::vec3 toonShadingOnlySpecular(const ShadingData& shadingData, const glm::vec3& vertexPos, const glm::vec3& normal, const glm::vec3& lightPos, const glm::vec3& cameraPos)
-{
-    return glm::vec3(0, 0, 1);
+glm::vec3 toonShadingOnlySpecular(const ShadingData &shadingData, const glm::vec3 &vertexPos, const glm::vec3 &normal,
+                                  const glm::vec3 &lightPos, const glm::vec3 &cameraPos) {
+    float cosNormalLight = glm::dot(glm::normalize(lightPos - vertexPos), normal);
+    if (cosNormalLight < 0) {
+        return glm::vec3(0);
+    }
+    auto lightVec = (lightPos - vertexPos);
+    auto camVec = (cameraPos - vertexPos);
+    auto normalN = glm::normalize(normal);
+    auto halfVector = glm::normalize(lightVec + camVec);
+    auto res = shadingData.Ks * glm::pow(glm::dot(halfVector, normalN), shadingData.shininess);
+
+//    auto val = glm::length(res);
+
+    if (glm::length(res) >= shadingData.toonSpecularThreshold) {
+        return glm::vec3(1);
+    } else { return glm::vec3(0); }
+
 }

@@ -1,0 +1,104 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/code/Assjson/cencode.c
+cencode.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/code/Assjson/cencode.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/code/Assjson/cencode.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/crypt.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/ioapi.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+zlib.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/zlib.h
+ioapi.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/ioapi.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/ioapi.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/unzip.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+zlib.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/zlib.h
+unzip.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/unzip.h
+stddef.h
+-
+string.h
+-
+stdlib.h
+-
+errno.h
+-
+crypt.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/crypt.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/unzip.h
+zlib.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/zlib.h
+ioapi.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/unzip/ioapi.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/zip/src/miniz.h
+stdlib.h
+-
+time.h
+-
+assert.h
+-
+string.h
+-
+stdio.h
+-
+sys/stat.h
+-
+sys/utime.h
+-
+sys/utime.h
+-
+sys/utime.h
+-
+utime.h
+-
+utime.h
+-
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/zip/src/zip.c
+errno.h
+-
+sys/stat.h
+-
+time.h
+-
+direct.h
+-
+unistd.h
+-
+miniz.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/zip/src/miniz.h
+zip.h
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/zip/src/zip.h
+
+/home/tmw/CLionProjects/CG/Code/C++/Assignment 3/cmake-build-debug/_deps/assimp-src/contrib/zip/src/zip.h
+string.h
+-
+sys/types.h
+-
+
