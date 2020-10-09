@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Final Project</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {  background-color: #f8f8f8; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ef2929; } /* Alert */
+    code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #c4a000; } /* Attribute */
+    code span.bn { color: #0000cf; } /* BaseN */
+    code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4e9a06; } /* Char */
+    code span.cn { color: #000000; } /* Constant */
+    code span.co { color: #8f5902; font-style: italic; } /* Comment */
+    code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+    code span.dt { color: #204a87; } /* DataType */
+    code span.dv { color: #0000cf; } /* DecVal */
+    code span.er { color: #a40000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #0000cf; } /* Float */
+    code span.fu { color: #000000; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+    code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+    code span.ot { color: #8f5902; } /* Other */
+    code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+    code span.sc { color: #000000; } /* SpecialChar */
+    code span.ss { color: #4e9a06; } /* SpecialString */
+    code span.st { color: #4e9a06; } /* String */
+    code span.va { color: #000000; } /* Variable */
+    code span.vs { color: #4e9a06; } /* VerbatimString */
+    code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+/*
+ * Slightly modified version of the following theme:;
+ * https://github.com/markdowncss/air
+ */
+html {
+  font-size: 12px;
+}
+
+@media print {
+  *:before,
+  *:after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html {
+    font-size: 14px;
+  }
+  body {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
+
+@media screen and (min-width: 32rem) and (max-width: 48rem) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media screen and (min-width: 48rem) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  line-height: 1.85;
+  padding-bottom: 2rem;
+}
+
+p,
+.air-p {
+  font-size: 1rem;
+  margin-bottom: 1.3rem;
+}
+
+h1,
+.air-h1,
+h2,
+.air-h2,
+h3,
+.air-h3,
+h4,
+.air-h4 {
+  margin: 1.414rem 0 .5rem;
+  font-weight: inherit;
+  line-height: 1.42;
+}
+
+h1,
+.air-h1 {
+  margin-top: 0;
+  font-size: 3.998rem;
+}
+
+h2,
+.air-h2 {
+  font-size: 2.827rem;
+}
+
+h3,
+.air-h3 {
+  font-size: 1.999rem;
+}
+
+h4,
+.air-h4 {
+  font-size: 1.414rem;
+}
+
+h5,
+.air-h5 {
+  font-size: 1.121rem;
+}
+
+h6,
+.air-h6 {
+  font-size: .88rem;
+}
+
+small,
+.air-small {
+  font-size: .707em;
+}
+
+/* https://github.com/mrmrs/fluidity */
+
+img,
+canvas,
+iframe,
+video,
+svg,
+select,
+textarea {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  max-width: 100%;
+}
+
+figcaption {
+  text-align: center;
+}
+.subfigures {
+  text-align: center;
+}
+.subfigures figure {
+  float: left;
+  width: 50%;
+  margin:0;
+  display: inline-block;
+}
+.subfigures img {
+  display: inline-block;
+  width: 90%;
+}
+.subfigures figure figcaption {
+  display: inline-block;
+}
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,300);
+
+body {
+  color: #444;
+  font-family: 'Open Sans', Helvetica, sans-serif;
+  font-weight: 300;
+  margin: 6rem auto 1rem;
+  max-width: 48rem;
+  text-align: justify;
+}
+
+/*img {
+  border-radius: 50%;
+  height: 200px;
+  margin: 0 auto;
+  width: 200px;
+}*/
+
+a,
+a:visited {
+  color: #3498db;
+}
+
+a:hover,
+a:focus,
+a:active {
+  color: #2980b9;
+}
+
+pre:not(.sourceCode) {
+  background-color: #fafafa;
+}
+pre {
+  padding: 1rem;
+  text-align: left;
+}
+
+blockquote {
+  margin: 0;
+  border-left: 5px solid #7a7a7a;
+  font-style: italic;
+  padding: 1.33em;
+  text-align: left;
+}
+
+ul,
+ol,
+li {
+  text-align: left;
+}
+
+p {
+  color: #777;
+}
+</style>
+  <div style="overflow:auto;">
+  	<p style="float:left;margin:0;"><b>CSE2215</b> - Computer Graphics</p><p style="float:right;margin:0;">Elmar Eisemann, Ricardo Marroqium, Mathijs Molenaar</p>
+  </div>
+
+  <hr>
+  <br/>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Final Project</h1>
+</header>
+<p>#Final Project</p>
+<p>The final project consists of three grades:</p>
+<h3 id="part-1---individual-25">Part 1 - individual [25%]</h3>
+<p>Implement ray-intersection methods. You will implement ray intersection with spheres, axis-aligned bounding boxes, planes, triangles and meshes. More details in the assignment description below.</p>
+<h3 id="part-2---group-70">Part 2 - group [70%]</h3>
+<p>Implement a ray-tracer. Full details when the assignment description is released.</p>
+<h3 id="blender-5">Blender [5%]</h3>
+<p>You should use Blender to model some object. It can be a character, house, cactus … anything that is not oversimple such as a box. You can also follow a tutorial and upload your tutorial model. If you want to use other modelling software you are allowed, but you need to submit an OBJ file.</p>
+<p><strong>Blender Hand in 1: deadline same as part 1</strong> : upload your model as an OBJ file (and any extra necessary files such as textures or mtl) and a screenshot of your model. For the screenshot, you can simply take a screenshot of the Blender window, or render an image of your model using Blender</p>
+<p><strong>Blender Hand in 2: deadline same as part 2</strong> : a rendering of your model with your ray tracer from part 2. The final report of each group should include at least one render of each group member’s model</p>
+<h1 id="final-project---part-1">Final Project - part 1</h1>
+<p>Part 1 is <strong>individual</strong>, but please note that you will need this first part to complete the second part of the Final Project.</p>
+<p>Here you will create the most fundamental part of a ray tracer, that is, compute ray intersection tests. You will test intersections against spheres, axis-aligned boxes, triangles, and meshes. To help you, we provide a visual debug to draw your rays and intersections.</p>
+<!-- ![Example of intersecting a ray with the dragon triangle mesh.](example_dragon.png){width=80%} --->
+<p>The camera is controlled in the same way as previous assignments. When you press <code>r</code> a ray is cast from the camera centre through the mouse cursor (along the camera’s <em>-z</em> axis). The ray will be drawn as a blue line segment and the first intersection will be drawn as a small green sphere. Keep in mind that because you are looking straight along the ray, the line may not be visible. <em>After clicking <code>r</code> try to move/rotate the camera to see the ray</em>. The program will test for intersections with all primitives in the scene. Your task is to complete the intersection tests in the file <code>ray_tracing.cpp</code>. You do not need to modify any other file.</p>
+<h3 id="ray">Ray</h3>
+<p>A ray is defined by its origin, a direction and a parameter <em>t</em> indicating the intersection point. In the code it is defined as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">struct</span> Ray {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a>    glm::vec3 origin { <span class="fl">0.0</span><span class="bu">f</span> };</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>    glm::vec3 direction { <span class="fl">0.0</span><span class="bu">f</span>, <span class="fl">0.0</span><span class="bu">f</span>, -<span class="fl">1.0</span><span class="bu">f</span> };</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>    <span class="dt">float</span> t { <span class="bu">std::</span>numeric_limits&lt;<span class="dt">float</span>&gt;::max() };</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>};</span></code></pre></div>
+<p>The intersection point of the ray is then defined as <code>p = ray.origin + ray.direction * ray.t</code>.</p>
+<p>When you press <code>r</code> the origin and direction are defined by the current camera location and orientation, and the <em>t</em> parameter is initialized with the highest possible float value, representing infinity as no intersection has yet been calculated.</p>
+<p>For every intersection method, the ray is passed by reference. You should check for intersections and update the <code>ray.t</code> value when necessary. Note that <code>ray.t</code> should always store the closest intersection parameter found so far, taking into consideration that rays should not intersect points behind the origin (only positive values for t).</p>
+<p>In short:</p>
+<ol type="1">
+<li>no intersection is found or \( t\): <strong>return false</strong></li>
+<li>found intersection point <strong>p</strong>
+<ol type="1">
+<li>if <strong>p</strong> is closer to the ray origin then current intersection point: <strong>return true</strong> and <strong>update ray.t</strong></li>
+<li>else <strong>return false</strong></li>
+</ol></li>
+</ol>
+<h2 id="intersections">Intersections</h2>
+<p>You have seen the three types of intersection in the lectures. We strongly recommend you to follow the methods described in the lectures. Below are more details on each type of intersection.</p>
+<h3 id="triangle">1. Triangle</h3>
+<p>You should implement the ray triangle intersection using the methods seen in the lectures. We have divided the ray-triangle intersection into 4 methods, as described below:</p>
+<h4 id="compute-the-triangles-plane">1.1 Compute the triangle’s plane</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>Plane trianglePlane(<span class="at">const</span> glm::vec3&amp; v0, <span class="at">const</span> glm::vec3&amp; v1, <span class="at">const</span> glm::vec3&amp; v2)</span></code></pre></div>
+<p>The <code>trianglePlane</code>receives the three vertices of a triangle and defines the plane that contains the triangle, that is, you need to set the plane.normal and plane.D values. The Plane structure is defined as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">struct</span> Plane {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>    <span class="dt">float</span> D = <span class="fl">0.0</span><span class="bu">f</span>;</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>    glm::vec3 normal { <span class="fl">1.0</span><span class="bu">f</span> };</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a>};</span></code></pre></div>
+<h4 id="ray-plane-intersection">1.2 Ray-Plane intersection</h4>
+<p>Once you have the plane you should test for ray-plane intersection:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="dt">bool</span> intersectRayWithPlane(<span class="at">const</span> Plane&amp; plane, Ray&amp; ray)</span></code></pre></div>
+<p>This method <code>intersectRayWithPlane</code> receives the plane and the ray, returns false if the ray does not intersect the plane, or true otherwise. In the case there is an intersection it should also update the <code>ray.t</code> value. If there is an intersection, the next step is to verify if the intersection point is inside the triangle.</p>
+<h4 id="point-inside-triangle-test">1.3 Point inside triangle test</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="dt">bool</span> pointInTriangle(<span class="at">const</span> glm::vec3&amp; v0, <span class="at">const</span> glm::vec3&amp; v1, <span class="at">const</span> glm::vec3&amp; v2, <span class="at">const</span> glm::vec3&amp; n, <span class="at">const</span> glm::vec3&amp; p)</span></code></pre></div>
+<p>This method receives the three vertices of the triangle, the triangle normal, and the point to be verified <strong>p</strong>. It returns true if the point is inside the triangle, false otherwise. Note that a point on the triangle edge is considered as inside the triangle.</p>
+<h4 id="ray-triangle-intersection-combine-the-three-methods-above">1.4 Ray triangle intersection (combine the three methods above)</h4>
+<p>Finally, you are ready to join the three previous function:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="dt">bool</span> intersectRayWithTriangle(<span class="at">const</span> glm::vec3&amp; v0, <span class="at">const</span> glm::vec3&amp; v1, <span class="at">const</span> glm::vec3&amp; v2, Ray&amp; ray)</span></code></pre></div>
+<p>The method <code>intersectRayWithTriangle</code> receives the three vertices of a triangle and the ray, and should check the intersection in three steps. First, compute the plane containing the triangle. Second, compute the intersection point of the ray and the plane. If there is an intersection, the third step is to check if the point is inside the triangle.</p>
+<p><strong>Tip</strong> Don’t forget to roll back the <code>ray.t</code> value modified in the <code>intersectRayWithPlane</code> method if the point is not inside the triangle</p>
+<p><strong>Obs</strong> The methods will be checked separately, so do not implement everything inside the <code>intersectRayWithTriangle</code> method!</p>
+<h3 id="mesh">2. Mesh</h3>
+<p>Finally, once the ray intersection with a single triangle is working, you can implement the method below to test the intersection with all triangles of a mesh, that is, with a complete model. This function should iterate through all triangles of the mesh and for each one call the function above for ray-triangle intersection.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="dt">bool</span> intersectRayWithShape(<span class="at">const</span> Mesh&amp; mesh, Ray&amp; ray)</span></code></pre></div>
+<p>The mesh structure is defined as follows:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="kw">struct</span> Mesh {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>    <span class="co">// Vertices contain the vertex positions and normals of the mesh.</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true"></a>    <span class="bu">std::</span>vector&lt;Vertex&gt; vertices;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true"></a>    <span class="co">// Triangles are the indices of the vertices involved in a triangle.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true"></a>    <span class="co">// A triangle, thus, contains a triplet of values corresponding to the 3 vertices of a triangle.</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true"></a>    <span class="bu">std::</span>vector&lt;Triangle&gt; triangles;</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true"></a>    Material material;</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true"></a>};</span></code></pre></div>
+<p>You can access the coordinates of the i-th vertex of the mesh using <code>vertices[i].p</code> where p is a glm vector <code>glm::vec3</code>. A triangle is just a triplet of indices to the vertices vector. Each triangle is defined as a glm vector <code>glm::uvec3</code>. For now you can ignore the material property, this will be used in the second part of the Final Project.</p>
+<h3 id="axis-aligned-bounding-box">3. Axis-aligned Bounding Box</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="dt">bool</span> intersectRayWithShape(<span class="at">const</span> AxisAlignedBox&amp; box, Ray&amp; ray)</span></code></pre></div>
+<p>For this method you receive a AxisAlignedBox structure defined as:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">struct</span> AxisAlignedBox {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>    glm::vec3 lower;</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true"></a>    glm::vec3 upper;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true"></a>};</span></code></pre></div>
+<p>The lower corner coordinates are the minimum x, y, and z of the bounding box, while the upper corner coordinates are the maximum x, y, and z coordinates. Note that since the box is aligned with the axis, the other corners can be defined by these two.</p>
+<h3 id="sphere">4. Sphere</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="dt">bool</span> intersectRayWithShape(<span class="at">const</span> Sphere&amp; sphere, Ray&amp; ray)</span></code></pre></div>
+<p>Similar to the Axis-aligned Box you also receive a sphere primitive defined as:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="kw">struct</span> Sphere {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>    glm::vec3 center;</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>    <span class="dt">float</span> radius;</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a>};</span></code></pre></div>
+<h2 id="test-cases">Test Cases</h2>
+<p>We provide a few test cases. When you implement the intersection methods and modify the <code>ray.t</code> value, the 3D interface will reflect your answer by scaling the ray and drawing a sphere at the intersection point. You can select the case using the GUI or the command line.</p>
+<p>Scenes:</p>
+<ol type="1">
+<li>Single triangle aligned with the plane xy</li>
+<li>Mesh of a cube (12 triangles)</li>
+<li>Mesh of the Stanford Dragon (approx. 87K triangles)</li>
+<li>3 Axis-aligned bounding boxes</li>
+<li>3 Spheres</li>
+<li>Mixed scene containing AABBs, Spheres and a mesh</li>
+</ol>
+<p>In <code>scene.cpp</code> you can create your own test scene using the <em>custom</em> case. Think of corner cases and think on how to setup a test to verify them. Also, note that you can setup a ray that is independent of the camera.</p>
+<h2 id="submission">Submission</h2>
+<p>You should only hand in the <strong>ray_tracing.cpp</strong> file.</p>
+</body>
+</html>

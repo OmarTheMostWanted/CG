@@ -67,7 +67,9 @@ glm::vec3 phongSpecularOnly(const ShadingData &shadingData, const glm::vec3 &ver
     auto camVec = glm::normalize(cameraPos - vertexPos);
     auto normalN = glm::normalize(normal);
     auto reflectedLight = glm::normalize(lightVec - (2 * (glm::dot(lightVec, normalN))) * normalN);
-    return shadingData.Ks * glm::pow(glm::dot(reflectedLight, camVec), shadingData.shininess);
+//    return shadingData.Ks * glm::pow(  glm::abs(glm::dot(reflectedLight, camVec)), shadingData.shininess);
+    return shadingData.Ks * glm::pow(  glm::max(glm::dot(reflectedLight, camVec) , 0.0f), shadingData.shininess); // if the dot product is negatice then the angle is more than 90degrees and should be 0
+
 }
 
 // Blinn-Phong Shading Specularity (http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model)
