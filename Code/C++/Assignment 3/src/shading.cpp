@@ -82,8 +82,8 @@ glm::vec3 blinnPhongSpecularOnly(const ShadingData &shadingData, const glm::vec3
     if (cosNormalLight < 0) {
         return glm::vec3(0);
     }
-    auto lightVec = (lightPos - vertexPos);
-    auto camVec = (cameraPos - vertexPos);
+    auto lightVec = (lightPos - vertexPos); //this needs to be normalized
+    auto camVec = (cameraPos - vertexPos); // this needs to be normalized
     auto normalN = glm::normalize(normal);
 //    auto halfVector = (lightVec + camVec)/glm::length((lightVec , camVec));
     auto halfVector = glm::normalize(lightVec + camVec);
@@ -91,6 +91,8 @@ glm::vec3 blinnPhongSpecularOnly(const ShadingData &shadingData, const glm::vec3
     return shadingData.Ks * glm::pow(glm::dot(halfVector, normalN), shadingData.shininess);
 }
 
+
+//this is wrong check https://en.wikipedia.org/wiki/Smoothstep https://roystan.net/articles/toon-shader.html
 // Diffuse Toon Shading.
 // Use the variable ToonDiscretize.
 // Normal diffuse shading has values between 0 and Kd (the diffuse coefficient).

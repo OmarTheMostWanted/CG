@@ -58,7 +58,10 @@ userInteractionShadow(const glm::vec3 &selectedPos, const glm::vec3 &selectedNor
     //make sure the two rays are not almost pointing the same direction.
     auto choseRay = glm::dot(selectedNormal, randomRay1) > 0.95f ? randomRay1 : randomRay2;
 
-    return glm::normalize(glm::cross(selectedNormal, choseRay));
+    //return glm::normalize(glm::cross(selectedNormal, choseRay));
+
+    //we need to move the new vector to the selected position, the vector I get is normalized ie at the origin.
+    return selectedPos + glm::normalize(glm::cross(selectedNormal, choseRay));
 
 
 }
