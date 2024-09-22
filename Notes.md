@@ -982,3 +982,518 @@ z \\
 $$
 
 This single matrix multiplication performs the entire sequence of translating to the origin, aligning with the principal axis, rotating, reversing the alignment, and translating back in one step.
+
+## Non-Commutativity of Transformations
+
+In computer graphics, transformations such as translation, rotation, and scaling are generally not commutative. This means that the order in which you apply these transformations matters. Applying transformation A followed by transformation B usually yields a different result than applying transformation B followed by transformation A.
+
+### Example in 2D
+
+Let's consider a point $(x, y)$ and apply a translation followed by a rotation, and then a rotation followed by a translation.
+
+#### Translation Followed by Rotation
+
+1. **Translation**: Translate the point by $(t_x, t_y)$:
+
+  $$
+   \begin{bmatrix}
+   x' \\
+   y'
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   x \\
+   y
+   \end{bmatrix}
+    +
+   \begin{bmatrix}
+   t_x \\
+   t_y
+   \end{bmatrix}
+   $$
+
+2. **Rotation**: Rotate the translated point by an angle $\theta$:
+   $$
+   \begin{bmatrix}
+   x'' \\
+   y''
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   \cos \theta & -\sin \theta \\
+   \sin \theta & \cos \theta
+   \end{bmatrix}
+   \begin{bmatrix}
+   x' \\
+   y'
+   \end{bmatrix}
+   $$
+
+#### Rotation Followed by Translation
+
+1. **Rotation**: Rotate the point by an angle $\theta$:
+   $$
+   \begin{bmatrix}
+   x' \\
+   y'
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   \cos \theta & -\sin \theta \\
+   \sin \theta & \cos \theta
+   \end{bmatrix}
+   \begin{bmatrix}
+   x \\
+   y
+   \end{bmatrix}
+   $$
+
+2. **Translation**: Translate the rotated point by $(t_x, t_y)$:
+
+$$
+   \begin{bmatrix}
+   x'' \\
+   y'' \\
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   x' \\
+   y'
+   \end{bmatrix}
+    +
+   \begin{bmatrix}
+   t_x \\
+   t_y
+   \end{bmatrix}
+   $$
+
+#### Comparison
+
+The final positions $(x'', y'')$ obtained from the two sequences of transformations will generally be different, demonstrating that translation and rotation are not commutative.
+
+### Example in 3D
+
+Let's consider a point $(x, y, z)$ and apply a scaling followed by a rotation, and then a rotation followed by a scaling.
+
+#### Scaling Followed by Rotation
+
+1. **Scaling**: Scale the point by factors $(s_x, s_y, s_z)$:
+   $$
+   \begin{bmatrix}
+   x' \\
+   y' \\
+   z'
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   s_x & 0 & 0 \\
+   0 & s_y & 0 \\
+   0 & 0 & s_z
+   \end{bmatrix}
+   \begin{bmatrix}
+   x \\
+   y \\
+   z
+   \end{bmatrix}
+   $$
+
+2. **Rotation**: Rotate the scaled point around the z-axis by an angle $\theta$:
+   $$
+   \begin{bmatrix}
+   x'' \\
+   y'' \\
+   z''
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   \cos \theta & -\sin \theta & 0 \\
+   \sin \theta & \cos \theta & 0 \\
+   0 & 0 & 1
+   \end{bmatrix}
+   \begin{bmatrix}
+   x' \\
+   y' \\
+   z'
+   \end{bmatrix}
+   $$
+
+#### Rotation Followed by Scaling
+
+1. **Rotation**: Rotate the point around the z-axis by an angle $\theta$:
+   $$
+   \begin{bmatrix}
+   x' \\
+   y' \\
+   z'
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   \cos \theta & -\sin \theta & 0 \\
+   \sin \theta & \cos \theta & 0 \\
+   0 & 0 & 1
+   \end{bmatrix}
+   \begin{bmatrix}
+   x \\
+   y \\
+   z
+   \end{bmatrix}
+   $$
+
+2. **Scaling**: Scale the rotated point by factors $(s_x, s_y, s_z)$:
+   $$
+   \begin{bmatrix}
+   x'' \\
+   y'' \\
+   z''
+   \end{bmatrix}
+   =
+   \begin{bmatrix}
+   s_x & 0 & 0 \\
+   0 & s_y & 0 \\
+   0 & 0 & s_z
+   \end{bmatrix}
+   \begin{bmatrix}
+   x' \\
+   y' \\
+   z'
+   \end{bmatrix}
+   $$
+
+#### Comparison
+
+The final positions $(x'', y'', z'')$ obtained from the two sequences of transformations will generally be different, demonstrating that scaling and rotation are not commutative.
+
+### Conclusion
+
+The non-commutativity of transformations means that the order in which you apply transformations matters. This property is crucial in computer graphics, as it affects how objects are manipulated and displayed in a scene.
+
+# Local vs. Global Interpretation
+
+In computer graphics, transformations can be interpreted in two different ways: globally and locally. These interpretations affect how we understand the transformation of points and coordinate systems.
+
+## Global Interpretation
+
+### Points Multiply from the Right
+
+When we multiply points by transformation matrices from the right, we are transforming the points with respect to a **global coordinate system**. This means that the transformations are applied to the points as if they are in a fixed, universal coordinate system.
+
+#### Example
+
+Consider a point $(x, y, z)$ and a transformation matrix $T$. The global interpretation is:
+$$
+\begin{bmatrix}
+x' \\
+y' \\
+z' \\
+1
+\end{bmatrix}
+=
+T
+\begin{bmatrix}
+x \\
+y \\
+z \\
+1
+\end{bmatrix}
+$$
+
+Here, $T$ could be a translation, rotation, or scaling matrix. The point $(x, y, z)$ is transformed with respect to the global coordinate system.
+
+### Intuition
+
+- **Global Coordinate System**: The transformations are applied as if the points are in a fixed, universal coordinate system.
+- **Consistency**: This approach ensures that all points are transformed consistently with respect to the same reference frame.
+
+## Local Interpretation
+
+### Matrices from the Left
+
+When we look at the matrices from the left, we interpret these transformations as a change of the origin or coordinate system. This establishes a **local coordinate system**. In this interpretation, the transformations are applied as if the coordinate system itself is being transformed.
+
+#### Example
+
+Consider the same point $(x, y, z)$ and transformation matrix $T$. The local interpretation is:
+$$
+\begin{bmatrix}
+x' \\
+y' \\
+z' \\
+1
+\end{bmatrix}
+=
+\begin{bmatrix}
+x \\
+y \\
+z \\
+1
+\end{bmatrix}
+T
+$$
+
+Here, the transformation matrix $T$ is applied as if the coordinate system is being transformed, rather than the points themselves.
+
+### Intuition
+
+- **Local Coordinate System**: The transformations are applied as if the coordinate system itself is being transformed.
+- **Relative Transformations**: This approach is useful for understanding how objects move relative to their own local coordinate systems.
+
+## Comparison
+
+### Global Interpretation
+
+- **Transforms Points**: Points are transformed with respect to a fixed, global coordinate system.
+- **Consistency**: Ensures consistent transformation of all points in the scene.
+
+### Local Interpretation
+
+- **Transforms Coordinate System**: The coordinate system itself is transformed, affecting how points are interpreted.
+- **Relative Movement**: Useful for understanding relative movements and transformations within a local frame of reference.
+
+### Practical Example
+
+Consider a robot arm with multiple joints. Using the global interpretation, each joint's position is calculated with respect to a fixed, global coordinate system. Using the local interpretation, each joint's position is calculated relative to the previous joint, establishing a local coordinate system for each segment of the arm.
+
+Understanding these two interpretations helps in designing and implementing complex transformations in computer graphics, ensuring that objects are manipulated correctly within their respective coordinate systems.
+
+
+## Perspective Projection
+
+Perspective projection is a technique used to project 3D points onto a 2D plane, mimicking how the human eye perceives the world. This is achieved using the **pinhole camera model**.
+
+### Pinhole Camera Model
+
+In the pinhole camera model, a 3D point $(X, Y, Z)$ is projected onto a 2D image plane at $(x, y)$ using the following equations:
+$$
+x = \frac{fX}{Z}, \quad y = \frac{fY}{Z}
+$$
+where $f$ is the focal length of the camera.
+
+### Deriving the Projection Matrix
+
+To derive the projection matrix, we use homogeneous coordinates. A 3D point $(X, Y, Z)$ in homogeneous coordinates is represented as $(X, Y, Z, 1)$. The projection matrix $P$ transforms this point to the 2D image plane:
+$$
+\begin{bmatrix}
+x \\
+y \\
+w
+\end{bmatrix}
+=
+\begin{bmatrix}
+f & 0 & 0 & 0 \\
+0 & f & 0 & 0 \\
+0 & 0 & 1 & 0
+\end{bmatrix}
+\begin{bmatrix}
+X \\
+Y \\
+Z \\
+1
+\end{bmatrix}
+$$
+After dividing by $w$, we get the 2D coordinates $(x, y)$.
+
+### Virtual Camera Model
+
+The virtual camera model includes the intrinsic and extrinsic parameters of the camera.
+
+- **Intrinsic Parameters**: These define the camera's internal characteristics, such as focal length and principal point. The intrinsic matrix $K$ is:
+  $$
+  K =
+  \begin{bmatrix}
+  f_x & 0 & c_x \\
+  0 & f_y & c_y \\
+  0 & 0 & 1
+  \end{bmatrix}
+  $$
+  where $f_x$ and $f_y$ are the focal lengths in the x and y directions, and $(c_x, c_y)$ is the principal point.
+
+- **Extrinsic Parameters**: These define the camera's position and orientation in the world. The extrinsic matrix $ [R|t] $ combines rotation $R$ and translation $t$.
+
+The complete projection matrix $P$ is:
+$$
+P = K [R|t]
+$$
+
+## Mapping to Pixels: Viewport Transformation
+
+After projecting the 3D points onto the 2D image plane, we need to map these coordinates to the pixel coordinates on the screen. This is done using the viewport transformation.
+
+### Viewport Transformation
+
+The viewport transformation maps the normalized device coordinates (NDC) to screen coordinates (pixels). The transformation involves scaling and translating the coordinates to fit the viewport.
+
+#### Steps
+
+1. **Normalize** the coordinates to the range $[-1, 1]$.
+2. **Scale** the normalized coordinates to the viewport size.
+3. **Translate** the scaled coordinates to the viewport position.
+
+The transformation can be represented as:
+$$
+x_{viewport} = \frac{(x_{ndc} + 1)}{2} \cdot width + x_{min}
+$$
+$$
+y_{viewport} = \frac{(y_{ndc} + 1)}{2} \cdot height + y_{min}
+$$
+
+## Complete Camera Model
+
+The complete camera model combines the projection matrix, camera matrix, and viewport transformation to map 3D world coordinates to 2D pixel coordinates.
+
+### Components
+
+1. **Camera Matrix**: Combines intrinsic and extrinsic parameters.
+2. **Projection Matrix**: Projects 3D points onto the 2D image plane.
+3. **Viewport Transformation**: Maps the 2D image plane coordinates to pixel coordinates.
+
+### Final Transformation
+
+The final transformation can be represented as:
+$$
+\text{Pixel Coordinates} = \text{Viewport Transformation} \times \text{Projection Matrix} \times \text{Camera Matrix} \times \text{World Coordinates}
+$$
+
+This complete model ensures that 3D points in the world are accurately projected onto the 2D image plane and mapped to the correct pixel coordinates on the screen.
+
+# Near and Far Clipping Planes
+
+## Explanation
+
+### Near Clipping Plane
+
+The near clipping plane is an imaginary plane located at a certain distance from the camera along its sight line. It defines the closest point to the camera that will be rendered. Any object closer to the camera than this plane will not be visible.
+
+### Far Clipping Plane
+
+The far clipping plane is another imaginary plane located at a certain distance from the camera along its sight line. It defines the farthest point from the camera that will be rendered. Any object farther from the camera than this plane will not be visible.
+
+### Why We Need Clipping Planes
+
+1. **Preventing Artifacts**: Without a near clipping plane, objects very close to the camera could cause rendering artifacts due to precision issues.
+2. **Performance Optimization**: Clipping planes help in culling objects that are too close or too far from the camera, reducing the number of objects that need to be processed and rendered.
+3. **Depth Buffer Precision**: The range between the near and far clipping planes affects the precision of the depth buffer. A smaller range improves depth precision, reducing z-fighting issues.
+
+## Deriving the New Projection Matrix
+
+To include the near and far clipping planes in the projection matrix, we need to modify the standard perspective projection matrix. Let's derive the new projection matrix step by step.
+
+### Standard Perspective Projection Matrix
+
+The standard perspective projection matrix without clipping planes is:
+$$
+P =
+\begin{bmatrix}
+f & 0 & 0 & 0 \\
+0 & f & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 1 & 0
+\end{bmatrix}
+$$
+where $f$ is the focal length.
+
+### Including Near and Far Clipping Planes
+
+To include the near ($n$) and far ($f$) clipping planes, we modify the projection matrix as follows:
+$$
+P =
+\begin{bmatrix}
+\frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\
+0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\
+0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
+0 & 0 & -1 & 0
+\end{bmatrix}
+$$
+where:
+- $r$ and $l$ are the right and left extents of the view frustum.
+- $t$ and $b$ are the top and bottom extents of the view frustum.
+- $n$ and $f$ are the near and far clipping planes.
+
+### Final Projection Matrix
+
+The final projection matrix, including the near and far clipping planes, ensures that objects outside the defined range are not rendered, optimizing performance and improving depth precision.
+
+## Complete Camera Model
+
+The complete camera model combines the projection matrix, camera matrix, and viewport transformation to map 3D world coordinates to 2D pixel coordinates.
+
+### Components
+
+1. **Camera Matrix**: Combines intrinsic and extrinsic parameters.
+2. **Projection Matrix**: Projects 3D points onto the 2D image plane, including near and far clipping planes.
+3. **Viewport Transformation**: Maps the 2D image plane coordinates to pixel coordinates.
+
+### Final Transformation
+
+The final transformation can be represented as:
+$$
+\text{Pixel Coordinates} = \text{Viewport Transformation} \times \text{Projection Matrix} \times \text{Camera Matrix} \times \text{World Coordinates}
+$$
+
+This complete model ensures that 3D points in the world are accurately projected onto the 2D image plane and mapped to the correct pixel coordinates on the screen.
+
+---
+
+# Graphics Pipeline
+
+## Rasterization
+
+Rasterization is the process of converting vector graphics into raster images. It involves determining which pixels to fill in to represent the shapes and colors of the objects in the scene.
+
+### Depth Test
+
+The depth test is a crucial step in the rasterization process. It determines whether a pixel should be drawn based on its depth value compared to the existing depth value in the depth buffer.
+
+### Virtual Camera Model
+
+Projecting a scene point with the camera:
+- Apply camera position (adding an offset)
+- Apply rotation (matrix multiplication)
+- Apply projection (non-linear scaling)
+
+#### Projection Matrix
+
+The projection matrix transforms 3D points to 2D screen coordinates. It includes the near and far clipping planes to optimize rendering and depth precision.
+
+$$
+\begin{bmatrix}
+\frac{f}{aspect} & 0 & 0 & 0 \\
+0 & f & 0 & 0 \\
+0 & 0 & \frac{near + far}{near - far} & \frac{2near \dot far }{near - far} \\
+0 & 0 & -1 & 0
+\end{bmatrix}
+$$
+
+Where:
+- $f$ is the focal length:
+  - The focal length determines the field of view of the camera. A shorter focal length results in a wider field of view, capturing more of the scene, while a longer focal length narrows the field of view, focusing on a smaller portion of the scene.
+- $aspect$ is the aspect ratio of the screen:
+  - The aspect ratio is the ratio of the width to the height of the screen. It ensures that the scene is displayed correctly without distortion.
+- $near$ and $far$ are the near and far clipping planes:
+  - The near and far clipping planes define the range of distances from the camera that will be rendered. Objects outside this range are not rendered, optimizing performance and depth precision.
+
+##### Z-Buffer
+As we go futher from the camera, the depth value increases. The Z-buffer stores the depth value of each pixel in the frame buffer. When a new pixel is drawn, the Z-buffer is checked to determine if the new pixel is closer to the camera than the existing pixel. If it is, the new pixel is drawn and its depth value is updated in the Z-buffer.
+However in the Z-buffer, the depth value is stored in a non-linear way. The Z-buffer is not linearly distributed, which can cause precision issues when rendering objects at different depths.
+
+#### Clip Space
+
+Check if the whole triangle is inside the view frustum. If not, clip the triangle to the view frustum.
+To clip a triangle, we can split it into smaller triangles that fit within the view frustum.
+
+## Standard Graphics Pipeline
+1. **Object Transformation**: Transform the object's vertices from object space to world space.
+2. **View Transformation**: Transform the vertices from world space to camera space.
+3. **Clipping**: Clip the vertices that are outside the view frustum.
+4. Scan Conversion:
+   - **Rasterization**: Convert the primitives into fragments.
+   - **Fragment Processing**: Determine the color of each fragment.
+5. **Depth Test**: Determine which fragments are visible based on their depth values.
+6. **Blend**: Combine the color of the fragments with the color of the frame buffer.
+
+## Graphics Pipeline in OpenGL
+1. **Vertex Shader**: Transform the vertices from object space to clip space. (Computation on each vertex)
+2. **Geometry Shader**: Process the primitives (points, lines, triangles). (Compute on each primitive)
+3. **Rasterization**: Convert the primitives into fragments.
+4. **Fragment Shader**: Determine the color of each fragment. (Computations on pixels)
+5. **Blend + Depth Test**: Combine the color of the fragments with the color of the frame buffer and determine which fragments are visible based on their depth values.
+
