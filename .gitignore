@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+.idea
+.vscode
+
+# CMake
+CMakeFiles
+CMakeCache.txt
+CMakeScripts
+CMakeTmp
+CMakeLists.txt.user
+cmake_install.cmake
+install_manifest.txt
+Makefile
+Makefile.cmake
+*cmake-build-debug*
+*cmake-build-release*
