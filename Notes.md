@@ -1477,7 +1477,7 @@ However in the Z-buffer, the depth value is stored in a non-linear way. The Z-bu
 
 #### Clip Space
 
-Check if the whole triangle is inside the view frustum. If not, clip the triangle to the view frustum.
+Check if the` whole triangle is inside the view frustum. If not, clip the triangle to the view frustum.
 To clip a triangle, we can split it into smaller triangles that fit within the view frustum.
 
 ## Standard Graphics Pipeline
@@ -1497,3 +1497,226 @@ To clip a triangle, we can split it into smaller triangles that fit within the v
 4. **Fragment Shader**: Determine the color of each fragment. (Computations on pixels)
 5. **Blend + Depth Test**: Combine the color of the fragments with the color of the frame buffer and determine which fragments are visible based on their depth values.
 
+
+## What makes a GPU fast?
+- Very high parallel throughput
+- The data typically resides on the GPU and is streamed through specialized programs
+- To illustrate parallel processing:
+   - imagine a stream of vertices, groups of vertices are processed in parallel (e.g., each vertex is multiplied by a  atrix) result is put back into a stream.
+
+## Flat Mesh represnation (Most basic)
+
+Simply store the vertix in order:
+- Vertix Positions $ [x_0 , y_0, z_0 , x_1 , y_1, z_1 , ...  x_n , y_n, z_n] $
+- Colors $ [r_0 , g_0, b_0 , r_1 , g_1, b_1 , ...  r_n , g_n, b_n] $
+
+The drawback of this is that for objects that share vertices, the same vertex is stored multiple times. This is inefficient in terms of memory usage and can lead to inconsistencies in the mesh.
+
+## Indexed Mesh Representation (Indexed Face Set)
+Instead of a seperate list of vertices for each mesh, we can use a single list of vertices and an index list that specifies for each triangle which vertices to use.
+
+- This saves memory and allows for more efficient rendering because shared vertices are only stored once.
+
+## Mesh with attributes GPU Ready:
+- Data is stored in arrays containing all vertices and attributes.
+- Triangles are defined by indices into the vertex array.
+   - Consecutive indices define faces
+
+## Vertex Shader
+Input: Vertecies with attributes
+Output: Vertecies with attributes
+
+What operations can be done in the vertex shader?
+- Object transformation (position, rotation, scale)
+- View transformation (camera position, orientation)
+
+### Vertex Shader Example (GLSL 4.3)
+```glsl
+#version 430 # version of GLSL
+layout(location = 0) uniform mat4 ModelViewMatrix;
+# layout means that the variable is bound to a specific location
+# location = 0 means that the variable is bound to location 0
+# uniform means that the variable is constant for all vertices 
+# mat4 is a 4x4 matrix
+layout(location = 1) in vec4 pos; // world space position
+# in means that the variable is an input to the vertex shader
+# vec4 is a 4D vector
+layout(location = 2) in vec3 normal; // world space normal
+# normal is a 3D vector
+
+//Data to be passed to geometry shader
+out vec3 gColor;
+# out means that the variable is an output from the vertex shader
+
+void main() {
+    gl_Position = ModelViewMatrix * pos;  # gl_Position is a built-in variable that stores the position of the vertex
+    gColor = vec3(normal.x , 0 , 0); // normal.x used as color
+}
+```
+
+## Geometry Shader
+Input:Vertex/Attribute array of current primitive (e.g., triangle or its immediate neighborhood)
+Output: Several primitives (vertices and attributes)
+
+### Primitives
+Primitives are specified by vertices (These are the traditional OpenGL primitives – some  can be considered outdated)
+
+#### Examples in OpenGL
+- GL_POINTS: Draws a point for each vertex.
+- GL_LINES: Draws a line between each pair of vertices.
+- GL_LINE_STRIP: Draws a series of connected lines.
+- GL_TRIANGLES: Draws a triangle for each set of three vertices.
+- GL_TRIANGLE_STRIP: Draws a series of connected triangles.
+
+
+### Input
+- The input to the geometry shader is a single primitive (e.g., a triangle) and its immediate neighborhood.
+- Points, lines, lines with adjacency, triangles or triangles with adjacency
+
+### Output
+- The geometry shader can output multiple primitives.
+- Geometry shader supports points, line_strip and triangle_strip as output
+
+
+```glsl
+#version 430
+layout (triangles) in; # input is a triangle
+layout (triangle_strips, max_vertices=3) out; # output is a triangle strip with a maximum of 3 vertices
+in vec3 gColor[3]; # input color for each vertex
+out vec3 fColor; # output color for each vertex
+void main(void){
+   for (int i=0;i<3;++i) { # loop over the vertices of the input triangle
+      gl_Position=gl_in[i].gl_position; # set the position of the output vertex
+      fColor=gColor[i]; # set the color of the output vertex
+      EmitVertex(); # emit the vertex ie output the vertex (creates a new vertex in the output primitive)
+   }
+   EndPrimitive(); # build the triangle from the 3 vertices
+}
+
+```
+
+## Rasterization
+- Convert primitives into fragments (pixels + attributes)
+- Fragment the data determined by interpolation of vertex attributes
+- Values are extract from the center pixels
+
+
+### Interpolation
+
+Interpolation is a method used to estimate values between known data points. When it comes to determining colors at a point within a triangle formed by three vertices, we often use **barycentric interpolation**. This method is particularly useful in computer graphics for shading and texture mapping.
+
+### Barycentric Coordinates
+
+Given a triangle with vertices $ V_1, V_2, V_3 $ and their corresponding colors $ C_1, C_2, C_3 $, we can determine the color at any point $ P $ inside the triangle using barycentric coordinates.
+
+The barycentric coordinates $ (\lambda_1, \lambda_2, \lambda_3) $ of point $ P $ are calculated as follows:
+
+1. **Calculate the areas of sub-triangles:**
+
+   - $ A $ is the area of the entire triangle $ V_1V_2V_3 $.
+   - $ A_1 $ is the area of the triangle $ PV_2V_3 $.
+   - $ A_2 $ is the area of the triangle $ PV_1V_3 $.
+   - $ A_3 $ is the area of the triangle $ PV_1V_2 $.
+
+2. **Compute the barycentric coordinates:**
+
+   $
+   \lambda_1 = \frac{A_1}{A}, \quad \lambda_2 = \frac{A_2}{A}, \quad \lambda_3 = \frac{A_3}{A}
+   $
+
+   These coordinates satisfy the condition $ \lambda_1 + \lambda_2 + \lambda_3 = 1 $.
+
+### Interpolating the Color
+
+Once we have the barycentric coordinates, we can interpolate the color $ C_P $ at point $ P $ using the colors at the vertices:
+
+$
+C_P = \lambda_1 C_1 + \lambda_2 C_2 + \lambda_3 C_3
+$
+
+### Example
+
+Let's say we have a triangle with vertices and colors as follows:
+
+- $ V_1 = (x_1, y_1) $ with color $ C_1 = (R_1, G_1, B_1) $
+- $ V_2 = (x_2, y_2) $ with color $ C_2 = (R_2, G_2, B_2) $
+- $ V_3 = (x_3, y_3) $ with color $ C_3 = (R_3, G_3, B_3) $
+
+To find the color at point $ P = (x, y) $:
+
+1. Calculate the areas $ A, A_1, A_2, A_3 $.
+2. Compute the barycentric coordinates $ \lambda_1, \lambda_2, \lambda_3 $.
+3. Interpolate the color:
+
+$
+C_P = \lambda_1 (R_1, G_1, B_1) + \lambda_2 (R_2, G_2, B_2) + \lambda_3 (R_3, G_3, B_3)
+$
+
+This method ensures that the color at any point inside the triangle is a smooth blend of the colors at the vertices.
+
+## Fragment Shader
+Input: Pixels with interpolatised attributes/verties
+Output:New Fragment for this position (Tipically new color for pixel)  
+
+- Fragment = colors + depth at a pixel location
+- Two fragments can fall in the same pixel (e.g., two  overlapping triangles)
+- Fragments cannot be moved in the Fragment shader, their location on the screen is fixed
+
+### Fragment Shader Example
+``` glsl
+#version 430
+in vec3 fColor; #Interpolated attributes (was specified on primitive vertices in the geometry shader)
+layout(location=0) out vec4 outColor;
+void main()
+{
+   outColor = vec4(fColor,1.0);
+}
+```
+
+## Blending
+- Combining the color of the fragments with the color of the frame buffer
+
+- Blending stage cannot be programmed.
+- It takes the produced fragment and combines it with the current image.
+
+## Summary (Vertex Shader VS Geometry Shader VS Fragment Shader)
+Input:
+- Vertex Shader: Vertices with attributes
+- Geometry Shader: Vertex/Attribute array of current primitive
+- Fragment Shader: Pixels with interpolated attributes/vertices
+
+Output:
+- Vertex Shader: Vertices with attributes
+- Geometry Shader: Several primitives (vertices and attributes)
+- Fragment Shader: New fragment for this position (typically new color for pixel)
+
+Operations:
+- Vertex Shader: Object transformation, view transformation
+- Geometry Shader: Process the primitives
+- Fragment Shader: Determine the color of each fragment
+
+
+
+### Vertex Shader
+- **Input**: Vertex attributes (position, color, texture coordinates, normals, etc.)
+- **Output**: Transformed vertex position, possibly additional data like color or texture coordinates
+- **Operations**:
+  - Transform vertex positions from object space to screen space
+  - Perform lighting calculations
+  - Pass data to the next stage (Geometry Shader or Fragment Shader)
+
+### Geometry Shader
+- **Input**: Primitives (points, lines, triangles) assembled from vertices
+- **Output**: Zero or more primitives (points, lines, triangles)
+- **Operations**:
+  - Generate new geometry (e.g., tessellation, extrusion)
+  - Modify existing geometry
+  - Pass data to the next stage (Fragment Shader)
+
+### Fragment Shader
+- **Input**: Fragments (potential pixels) with interpolated data from previous stages
+- **Output**: Color and depth values for each fragment
+- **Operations**:
+  - Compute final color of a pixel
+  - Apply textures and lighting
+  - Perform per-pixel operations like fog, shadow mapping, etc.
