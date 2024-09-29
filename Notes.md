@@ -1720,3 +1720,40 @@ Operations:
   - Compute final color of a pixel
   - Apply textures and lighting
   - Perform per-pixel operations like fog, shadow mapping, etc.
+
+
+# Computer Animation
+## animation is about movement
+- objects
+- light
+- texture
+- camera
+
+Animation is not about moving objects in a random manner, the frames per second matter as well as the animation speed.
+
+Anmations could be done in 2D or 3D. Operations such as translation, rotation, scaling, and shearing are used to animate objects.
+
+Animation is a story:
+- actions
+- gaols
+- expressions
+
+## Keyframe Animation
+Keyframes describe important monents in the animation. 
+The keyframes can be very fine or very coarse depending on the animation.
+Keyframes are marked by time and the object's state at that time.
+
+## Inbetweening
+Inbetweening is the process of generating intermediate frames between two keyframes to create smooth motion.
+
+### First Idea: Linear Interpolation
+Interpolating between two keyframes using linear interpolation:
+
+#### Animation is about timing
+- from X to Y in t seconds
+
+## Second Idea: Use Physics
+- Use physics to animate objects using physical laws such as acceleration, velocity, and force.
+
+## Third Idea: Non-Linear Interpolation
+
