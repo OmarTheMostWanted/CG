@@ -1840,45 +1840,168 @@ where:
 - $ t $ is the interpolation parameter (0 <= t <= 1)
 
 
+### Squad Spherical Interpolation
+Squad interpolation is a method for interpolating between two unit quaternions using spherical interpolation (SLERP) and tangents to create a smooth curve.
+
+
+## Speed Along Curve
+
+### Curve Parameterization
+When an object moves along a Bézier curve, its speed is not constant. This is because the parameter $ t $ does not vary linearly with respect to the arc length of the curve. In other words, equal increments in $ t $ do not correspond to equal distances traveled along the curve.
+
+### Re-parameterization
+To control the speed of an object along the curve, we need to re-parameterize the curve so that the parameter varies linearly with respect to the arc length. Here's how we can do it:
+
+1. **Divide the curve into equal $ t $ segments**:
+   - Start by dividing the parameter $ t $ into equal segments. For example, if $ t $ ranges from 0 to 1, you might divide it into 100 equal segments.
+
+2. **Approximate each arc-segment by a line**:
+   - For each segment of $ t $, approximate the corresponding segment of the curve by a straight line. This can be done by evaluating the Bézier curve at the endpoints of each $ t $ segment and connecting these points with straight lines.
+
+3. **Make a look-up table for arc-length**:
+   - Calculate the length of each line segment and accumulate these lengths to create a look-up table that maps $ t $ values to arc lengths. This table will help us convert $ t $ to arc length.
+
+4. **Convert $ t $ to arc-length**:
+   - To move an object along the curve at a constant speed, use the look-up table to find the corresponding $ t $ value for a given arc length. This allows you to re-parameterize the curve so that the object moves at a constant speed.
+
+### Intuition
+The key idea is to ensure that the parameter $ t $ varies in such a way that equal increments in $ t $ correspond to equal distances traveled along the curve. By re-parameterizing the curve based on arc length, we can achieve a constant speed for the object moving along the curve.
+
+In summary, the process involves:
+- Dividing the curve into equal $ t $ segments.
+- Approximating each segment by a line.
+- Creating a look-up table for arc length.
+- Using the look-up table to convert $ t $ to arc length, ensuring constant speed.
+
+This approach allows for smooth and consistent motion along the curve, providing better control over the speed of the object.
+
+
+## Forward Kinematics (FK)
+Forward Kinematics involves calculating the position of each joint in a kinematic chain by operating on each joint individually. Given the angles of the joints, we can determine the position of the **end effector** (the final point of the chain or arm).
+
+### Intuition
+Imagine you have a robotic arm with several segments connected by joints. By specifying the angles of each joint, you can determine the position of the end effector. This is like moving your arm by controlling the angles of your shoulder, elbow, and wrist.
+
+## Inverse Kinematics (IK)
+Inverse Kinematics involves calculating the joint angles required to place the end effector at a desired position. Instead of operating on each joint individually, we operate on the end effector and work backward to find the joint angles.
+
+### Intuition
+Imagine you want to reach a specific point with your hand. Instead of thinking about the angles of your shoulder, elbow, and wrist, you focus on the position of your hand and let your brain figure out the necessary joint angles. This is the essence of IK.
+
+## IK Analytical
+In analytical IK, we use mathematical equations to find the joint angles. Let's consider a simple 2D example with three joints (a, b, and c) and their corresponding transformation matrices.
+
+### Transformation Matrices
+The transformation matrices for joints a, b, and c are given by:
+
+$$ M_a = \begin{bmatrix} 1 & 0 & a_x \\ 0 & 1 & a_y \\ 0 & 0 & 1 \end{bmatrix} $$
+$$ M_b = M_a \begin{bmatrix} 1 & 0 & d_0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+$$ M_c = M_b \begin{bmatrix} 1 & 0 & d_1 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+Where:
+- $ a_x $ and $ a_y $ are the coordinates of joint a.
+- $ d_0 $ is the distance between joints a and b.
+- $ d_1 $ is the distance between joints b and c.
+
+### Calculating Positions
+To find the positions of points a, b, and c, we use the transformation matrices:
+
+$$ a = M_a \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} $$
+$$ b = M_b \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} $$
+$$ c = M_c \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} $$
+
+### Detailed Explanation of Matrices
+1. **Matrix $ M_a $**:
+   - Represents the initial position of joint a.
+   - $ a_x $ and $ a_y $ are the coordinates of joint a.
+
+2. **Matrix $ M_b $**:
+   - Represents the position of joint b after applying the transformation from joint a.
+   - $ d_0 $ is the distance between joints a and b.
+
+3. **Matrix $ M_c $**:
+   - Represents the position of joint c after applying the transformations from joints a and b.
+   - $ d_1 $ is the distance between joints b and c.
+
+### Combining Rotations and Translations
+To account for rotations, we modify the transformation matrices:
+
+$$ M_b = M_a \begin{bmatrix} \cos \theta_0 & -\sin \theta_0 & 0 \\ \sin \theta_0 & \cos \theta_0 & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} 1 & 0 & d_0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} = M_a \begin{bmatrix} \cos \theta_0 & -\sin \theta_0 & d_0 \cos \theta_0 \\ \sin \theta_0 & \cos \theta_0 & d_0 \sin \theta_0 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+$$ M_c = M_b \begin{bmatrix} \cos \theta_1 & -\sin \theta_1 & 0 \\ \sin \theta_1 & \cos \theta_1 & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} 1 & 0 & d_1 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} = M_b \begin{bmatrix} \cos \theta_1 & -\sin \theta_1 & d_1 \cos \theta_1 \\ \sin \theta_1 & \cos \theta_1 & d_1 \sin \theta_1 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+### Finding Joint Angles
+Given the position of point c, we can find the joint angles $ \theta_0 $ and $ \theta_1 $:
+
+$$ \begin{bmatrix} c_x \\ c_y \\ 1 \end{bmatrix} = \begin{bmatrix} d_0 \cos \theta_0 + d_1 \cos {(\theta_0 + \theta_1)} \\ d_0 \sin \theta_0 + d_1 \sin {(\theta_0 + \theta_1)} \\ 1 \end{bmatrix} $$
+
+To solve for $ \theta_0 $ and $ \theta_1 $:
+
+$$ \theta_1 = \cos^{-1} \left( \frac{c_x^2 + c_y^2 - d_0^2 - d_1^2}{2d_0d_1} \right) $$
+
+$$ \theta_0 = \tan^{-1} \left( \frac{c_y}{c_x} \right) - \tan^{-1} \left( \frac{d_1 \sin \theta_1}{d_0 + d_1 \cos \theta_1} \right) $$
+
+### Considerations
+- $ a $, $ d_0 $, and $ d_1 $ are constants.
+- We do not need to worry about $ b $ or $ M_a $ directly, as they are intermediate steps in the calculation.
+
+By understanding these concepts and equations, you can solve for the joint angles required to position the end effector at a desired location using Inverse Kinematics.
+
+
+
 ## Rigging
+
 Rigging is the process of creating a skeleton for a 3D model to enable animation. The skeleton consists of bones and joints that define the structure of the model and how it can move.
 
 It's very difficult to operate on the vertices of a 3D model directly. Instead, we can use a skeleton to control the movement of the model.
 
 ### Bones and Joints
 - **Bones**: The rigid segments of the skeleton that define the structure of the model.
-   - Attribute every vertex to a bone
-   - if a bone moves, the vertices move with it with the same transformation
+   - Each vertex of the 3D model is associated with one or more bones.
+   - When a bone moves, the vertices associated with it move with the same transformation, ensuring that the model deforms in a controlled manner.
 - **Joints**: The connections between bones that allow movement.
-   - Joints define how bones can rotate and translate relative to each other.
+   - Joints define how bones can rotate and translate relative to each other, enabling complex movements like bending and twisting.
 
-This leads to ridgid body transformations leading sharp edges at the joints or discontinuities in the lines.
+However, using rigid body transformations can lead to sharp edges at the joints or discontinuities in the lines. This is because the vertices move rigidly with the bones, resulting in unnatural deformations.
 
-We want rigid body transformations but smooth transitions at the mesh level.
-
+To achieve smooth transitions at the mesh level, we need to use a technique called skinning.
 
 ## Skinning
+
 Skinning is the process of deforming a 3D model based on the movement of the skeleton. The skin of the model is attached to the bones, and as the bones move, the skin deforms accordingly.
 
 ### Linear Blend Skinning (LBS)
+Linear Blend Skinning (LBS) is a popular technique used to achieve smooth deformations. The key idea is to blend the influence of multiple bones on each vertex, allowing for smooth transitions between different parts of the skeleton.
+
 In the transition region between two bones, the vertices are influenced by both bones. The influence of each bone is determined by weights assigned to the vertices (in the blend region).
+
+The formula for LBS is:
 
 $$ v_j = \sum_{i=1}^{n} w_{ij} T_i(v) $$
 
 Where:
 - $ v_j $ is the deformed vertex position.
-- $ w_{ij} $ is the weight of bone $ i $ on vertex $ j $ and the sum of weights for each vertex much be 1 (normalized).
+- $ w_{ij} $ is the weight of bone $ i $ on vertex $ j $. The sum of weights for each vertex must be 1 (normalized).
 - $ T_i(v) $ is the transformation of bone $ i $ on vertex $ v $.
 
-### Interpolating the normal vectors
-- $ n_j = \sum_{i=1}^{n} w_{ij} T_i^{-T}(n_j) $
+### Intuition Behind LBS
+Imagine you have a piece of cloth attached to two sticks. If you move one stick, the cloth will deform, but the deformation will be influenced by the position of both sticks. The closer a point on the cloth is to a stick, the more influence that stick has on the point's movement.
+
+In LBS, each vertex of the 3D model is like a point on the cloth, and the bones are like the sticks. The weights $ w_{ij} $ determine how much influence each bone has on each vertex. By blending the transformations of multiple bones, we achieve smooth and natural deformations.
+
+### Interpolating the Normal Vectors
+To ensure that the lighting and shading of the model remain consistent, we also need to interpolate the normal vectors. The formula for interpolating the normal vectors is:
+
+$$ n_j = \sum_{i=1}^{n} w_{ij} T_i^{-T}(n_j) $$
 
 Where:
 - $ n_j $ is the deformed normal vector.
 - $ T_i^{-T}(n_j) $ is the inverse transpose of the transformation matrix of bone $ i $ on normal $ n_j $.
 
+By interpolating the normal vectors, we ensure that the surface normals are correctly transformed, resulting in smooth shading and realistic lighting.
 
-Interolate the normals as well as the vertex positions. (the normals are used for shading and lighting so recalculating them is important)
+In summary, Linear Blend Skinning (LBS) allows us to achieve smooth and natural deformations by blending the influence of multiple bones on each vertex. This technique ensures that the model deforms in a controlled and realistic manner, providing better control over the animation.
+
 
 ## Motion Capture
 Motion capture is the process of recording the movement of objects or people. It is commonly used in animation, sports, and medicine to capture realistic movements.
@@ -1913,3 +2036,159 @@ Each column of the matrix is a target shape and the weights are the coefficients
 - Manually: An artist can set the weights based on the desired expression.
 Sometimes the face is split into regions and the weights are set for each region.
 
+
+# Materials & Shading
+## Standard Blending
+Color can be a vec4 with the first three values being the RGB values and the last value being the alpha value.
+The alpha value determines the transparency of the color; 0 means fully transparent, and 1 means fully opaque.
+
+In general, incoming fragment (R,G,B,A) and current pixel color is  $ R_BG_BB_B $ (background) then the new pixel color is: $ A * RGB+ (1-A) * R_BG_BB_B $
+
+Explanation: The new color is a combination of the incoming fragment color and the current pixel color based on the alpha value of the fragment.
+
+Order is important when blending colors. The order of the fragments determines the final color.
+
+Why this formula?
+Imagine if the object have tiny holes with probabilty alpha,  with 0.5 the object with represtn a checkerboard pattern with the background
+
+A light ray hits with probability A and passes with probability (1-A), hence, $ A * color + (1-A) * Background $
+
+- If you have several transparent objects, it might be needed to sort the triangles.
+- Be aware that when drawing transparent objects you should draw them last and deactivate the depth buffer because the depth buffer will not work correctly with transparent objects.
+
+## Shading
+Given a surface point (postion, normal and potential attributes) and a light source, we need to determine the color of the surface point.
+
+### Reflection
+Mirror: The angle of incidence is equal to the angle of reflection.
+Perfectly defused: The light is reflected in all directions.
+
+
+### How materials are represented? BRDF
+BRDF (Bidirectional Reflectance Distribution Function) is a function that describes how light is reflected at an opaque surface. It takes the incoming light direction and the outgoing light direction as input and returns the ratio of the outgoing radiance to the incoming irradiance.
+
+Function from $ IR^5 $ (incoming light direction, outgoing light direction, normal, incoming light, outgoing light) into $ IR $ (ratio between in- and outgoing energy) indication how much incident (incoming) light is reflected in a point.
+
+$ f_x(\theta_i , \theta_o , \lambda) $ where:
+- $ \theta_i $ is the incoming light direction
+- $ \theta_o $ is the outgoing light direction
+- $ \lambda $ is the wavelength of the light
+
+### Acquired Materials
+Big database of materials with their BRDFs. The BRDFs are measured in a lab and stored in a database. The BRDFs are used to render the materials in a realistic way.
+
+This is useful for rendering realistic materials like metals, plastics, and fabrics but it is computationally expensive and not flexible for digital artists.
+
+#### Material Acquisition
+Using a gonioreflectometer to measure the BRDF of a material. The gonioreflectometer measures the reflection of light at different angles and wavelengths.
+
+
+### Mathematical Models
+Describe light interaction as a function (Mathematically describe Material Properties)
+- Usually more lightweight
+- Has parameters to control appearance
+- Acquired materials can be approximated
+
+
+#### Phong Model: Sum of 3 terms
+- Ambient: Constant color for all surfaces
+- Diffuse: Light that is scattered in all directions
+- Specular: Light that is reflected in a specific direction
+
+Visual system uses 3 cone types for color. In our model, we will treat wavelengths separately (in practice: Red, Green, Blue).
+In the following, we usually describe the model for a single wavelength/color channel (do it 3 times for red, green, blue...)
+
+##### Ambient Term
+Is supposed to represent the light that is scattered in the environment. It is a constant color for all surfaces.
+
+$$ A = k_a I_a $$
+
+Where:
+- $ A $ is the ambient light intensity
+- $ k_a $ is the ambient reflection coefficient (Surface property) (Incriesing this value will make the object brighter)
+- $ I_a $ is the ambient light intensity (Light property)
+
+Used often in practice as a strong approximation of indirect light, but does't show the shape of the object.
+
+
+##### Diffuse Term
+Represents the light that is scattered (Uniformly) in all directions. It depends on the angle between the light source and the normal of the surface.
+
+$$ D = k_d I_d \max(0, \vec{n} \cdot \vec{l}) $$
+
+Where:
+- $ D $ is the diffuse light intensity
+- $ k_d $ is the diffuse reflection coefficient (Surface property)
+- $ I_d $ is the diffuse light intensity (Light property)
+- $ \vec{n} $ is the normal vector of the surface
+- $ \vec{l} $ is the light direction vector
+
+Shading varies along surface and Gives information about shape, doesn't depend on the viewer position.
+
+The light should always come from above the surface, otherwise, it should stay black.
+
+What does this mean for the angle $ \theta $ between the normal and the light direction?
+- If $ \theta = 0 $, the light is perpendicular to the surface and the intensity is maximal.
+- If $ \theta = 90 $, the light is parallel to the surface and the intensity is zero.
+
+
+##### Specular Term
+
+Represents the light that is reflected in a specific direction. It depends on the angle between the viewer and the reflection of the light source.
+
+$$ S(\phi) = k_s I_s \cos^n(\phi) $$
+
+Where:
+- $ S(\phi) $ is the specular light intensity
+- $ k_s $ is the specular reflection coefficient (Surface property)
+- $ I_s $ is the specular light intensity (Light property)
+- $ \phi $ is the angle between the reflection of the light source and the viewer
+- $ n $ is the shininess coefficient (Surface property)
+
+##### Emissive Term (Extention)
+Represents the light that is emitted by the surface itself. It is a constant color for all surfaces, it's Ambient light with Light set to 1.
+
+### Computatinon
+- Early days - compute color per face: Flat shading produces “facets”
+- Later – compute color per vertex: produces Gouraud Shading produces a smooth look
+
+There are more advanced shading techniques but you trade off between quality and performance.
+
+### Normals on Meshes
+- Face normals (normal of the plane containing triangle)
+- Vertex normals (average of face normals of adjacent faces)
+- Interpolated normals (interpolated vertex normals over the triangle)
+
+
+### Gouraud Shading (Per Vertex)
+Computes the color at the vertices and interpolates the color across the triangle.
+
+### Phong Shading (Per Pixel)
+Computes the color at each pixel by interpolating the normals and then computing the color.
+More expensive than Gouraud shading but produces better results (because there are usually more pixels than vertices).
+
+
+### How are the three different types computed?
+- Flat shading
+   - Applies Phong Model to produce a color per **face**
+- Gouraud shading
+   - Applies Phong to produce a color per **vertex**
+   - Interpolate color from vertices over triangle
+- Phong shading
+   - Interpolate parameters of **Phong model**
+   - Applies Phong to produce a color per **pixel**
+
+
+## Textures
+Images that are mapped to the surface of a 3D object to add detail, color, or other properties.
+Could be used to map properties like color, roughness, or transparency to the surface of an object.
+
+Specified at each vertex and interpolated over the triangle.
+
+``` glsl
+glTexCoord{123}{fi}
+```
+
+### How to define Texture Coordinates?
+#### Mesh Unwrapping
+Unwrap the 3D model to a 2D plane using special software and draw the texture on the 2D plane.
