@@ -2192,3 +2192,53 @@ glTexCoord{123}{fi}
 ### How to define Texture Coordinates?
 #### Mesh Unwrapping
 Unwrap the 3D model to a 2D plane using special software and draw the texture on the 2D plane.
+
+
+# Advanced Material
+
+## Color (Radiometry)
+Color comes from light interaction
+Pixel color represents the result from the light interaction with the environment
+It depends on:
+- Light sources
+- Surface reflection properties
+- Sensor properties
+- Processor (How the light is interpreted)
+
+Perfect Mirror: Reflects light in a single direction at the same angle as the incoming light
+Perfect Diffuse: Reflects light in all directions uniformly (intentisy may change)
+Glossy: Reflects light in a specific direction (like a mirror) but with a spread
+
+## Reflectance Function BRDF
+Input:
+- Point on the surface
+- Incoming light direction
+- Outgoing light direction
+- Wave length of the light
+
+Output:
+- Ratio of the outgoing radiance to the incoming irradiance
+
+
+Phong model is not physically possible as the light is not conserved (light is created)
+
+## Mathematical Formulation
+
+Lets say we know the reflectance function $ f_r(p, v, l) $
+What about other incoming directions?
+- integrate over hemisphere (all incoming directions)
+- note: here we assume rays, but really differential quantities
+
+$$ L_o(p, v) = \int_{H} f_r(p, v, l) L_i(p, l) (n \cdot \theta) dl $$
+
+Where:
+- $ L_o(p, v) $ is the outgoing radiance
+- $ f_r(p, v, l) $ is the reflectance function
+- $ L_i(p, l) $ is the incoming radiance
+- $ n \cdot \theta $ is the cosine term of the angle between the normal and the incoming light direction
+- p is the point on the surface
+- v is the outgoing light direction
+- l is the incoming light direction
+
+### Intuition Behind the Integration
+Imagine a point on a surface illuminated by light from all directions. To determine the total light leaving this point in a specific direction, we need to consider the contribution of light from every incoming direction. The reflectance function tells us how much of the incoming light is reflected towards the outgoing direction. By integrating over the hemisphere, we sum up the contributions from all incoming directions, weighted by the cosine term to account for the angle of incidence.
