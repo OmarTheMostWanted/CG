@@ -994,40 +994,10 @@ Let's consider a point $(x, y)$ and apply a translation followed by a rotation, 
 #### Translation Followed by Rotation
 
 1. **Translation**: Translate the point by $(t_x, t_y)$:
-
-  $$
-   \begin{bmatrix}
-   x' \\
-   y'
-   \end{bmatrix}
-   =
-   \begin{bmatrix}
-   x \\
-   y
-   \end{bmatrix}
-    +
-   \begin{bmatrix}
-   t_x \\
-   t_y
-   \end{bmatrix}
-   $$
+$  \begin{bmatrix}   x' \\   y'   \end{bmatrix}   =   \begin{bmatrix}   x \\   y   \end{bmatrix}     +   \begin{bmatrix}   t_x \\   t_y   end{bmatrix}   $
 
 2. **Rotation**: Rotate the translated point by an angle $\theta$:
-   $$
-   \begin{bmatrix}
-   x'' \\
-   y''
-   \end{bmatrix}
-   =
-   \begin{bmatrix}
-   \cos \theta & -\sin \theta \\
-   \sin \theta & \cos \theta
-   \end{bmatrix}
-   \begin{bmatrix}
-   x' \\
-   y'
-   \end{bmatrix}
-   $$
+$   \begin{bmatrix}   x'' \\   y''   \end{bmatrix}   =   \begin{bmatrix}   \cos \theta & -\sin \theta \\   \sin \theta & \cos \theta   end{bmatrix}   \begin{bmatrix}   x' \\   y'   \end{bmatrix}   $
 
 #### Rotation Followed by Translation
 
@@ -1754,6 +1724,192 @@ Interpolating between two keyframes using linear interpolation:
 
 ## Second Idea: Use Physics
 - Use physics to animate objects using physical laws such as acceleration, velocity, and force.
+- Not Everything is easily described by physics though.
+
+
 
 ## Third Idea: Non-Linear Interpolation
+
+### Bezier curves
+Bezier curves are used to create smooth animations. They are defined by control points that influence the shape of the curve.
+Using control points, we can create curves that are not linear but smooth.
+
+#### Binomial Coefficients Reminder
+The binomial coefficient $ \binom{n}{k} $ represents the number of ways to choose $ k $ elements from a set of $ n $ elements. It is calculated as:
+$$ \binom{n}{k} = \frac{n!}{k!(n-k)!} $$
+
+### Bezier Curves Formula
+$ B(t) = \sum_{i=0}^{n} \binom{n}{i} (1-t)^{n-i} t^i P_i $
+
+Where:
+- $ B(t) $ is the Bezier curve at time $ t $
+- $ n $ is the degree of the curve (number of control points - 1)
+- $ P_i $ are the control points
+- $ t $ is the time parameter (0 <= t <= 1)
+
+#### Bezier Curves Example (Linear)
+For a linear Bezier curve with control points $ P_0, P_1 $:
+$$ B(t) = \binom{1}{0} (1-t)^1 t^0 P_0 + \binom{1}{1} (1-t)^0 t^1 P_1 $$
+$$ B(t) = (1-t) P_0 + t P_1 $$
+
+#### Bezier Curves Example (Quadratic)
+For a quadratic Bezier curve with control points $ P_0, P_1, P_2 $:
+$$ B(t) = \binom{2}{0} (1-t)^2 P_0 + \binom{2}{1} (1-t) t P_1 + \binom{2}{2} t^2 P_2 $$
+$$ B(t) = (1-t)^2 P_0 + 2(1-t) t P_1 + t^2 P_2 $$
+
+### Composite Bezier Curves
+Composite Bezier curves are created by chaining multiple Bezier curves together. The end point of one curve becomes the start point of the next curve.
+ But constricting the last point of the first curve to the first point of the second curve to be of equal distance of the line you get a smooth transition 
+
+## Orientation  Interpolation
+
+### Invalid Approach: Linear Interpolation
+Lets try to interpolate between two orientations in a similar way to how we interpolate between two positions.
+
+Linear interpolation  between two points (LERP)
+- $ P(t) = (1-t) P_0 + t P_1 $
+
+Linear interpolation between two rotation matrices?
+- $ R(t) = (1-t) R_0 + t R_1 $
+
+Take two matrices:
+$$ R_x(\theta) = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \cos \theta & -\sin \theta \\ 0 & \sin \theta & \cos \theta \end{bmatrix} $$
+$$ R_z(\theta) = \begin{bmatrix} \cos \theta & -\sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+Take $ R_0 = R_x(\pi) $ and $ R_1 = R_z(\pi) $.
+$ R(t) = (1-t) R_0(\pi) + t R_1(\pi) $
+Take t = 0.5 and plug it in the equation
+
+We get an invalid rotation matrix:
+
+$$ R(0.5) = 0.5 \begin{bmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{bmatrix} + 0.5 \begin{bmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix} $$
+
+$$ = \begin{bmatrix} 0.5 & -0.5 & 0 \\ 0.5 & 0 & -0.5 \\ 0 & 0.5 & 0.5 \end{bmatrix} $$
+
+This matrix is not a valid rotation matrix, as it does not have an orthonormal basis (the columns are not orthogonal to each other).
+
+### Interpolate The Angles
+Instead of interpolating the rotation matrices directly, we can interpolate the angles (e.g., Euler angles) and then construct the rotation matrix from the interpolated angles.
+
+#### Euler Angles
+Euler angles are a set of three angles that represent the orientation of an object in 3D space. The most common representation is the XYZ rotation sequence, where the object is rotated around the X, Y, and Z axes in that order.
+
+$ R(\alpha, \beta, \gamma) = R_z(\gamma) R_y(\beta) R_x(\alpha) $
+$ \alpha(t) = (1-t) \alpha_0 + t \alpha_1 $
+$ \beta(t) = (1-t) \beta_0 + t \beta_1 $
+$ \gamma(t) = (1-t) \gamma_0 + t \gamma_1 $
+
+But this approach has a problem as the **order** of rotation matters.
+Also its **ambiguous** as the same orientation can be represented in different ways.
+
+##### Gimbal Lock
+Gimbal lock is a phenomenon that occurs when two of the three axes of rotation become aligned, leading to a loss of one degree of freedom and potential problems in representing orientations.
+
+### Quaternion Interpolation
+Quaternions are defined as four-dimensional complex numbers:
+$$ q_0 + q_1 i + q_2 j + q_3 k $$
+where $ i, j, k $ are the quaternion units and $ q_0, q_1, q_2, q_3 $ are real numbers.
+$$ i^2 = j^2 = k^2 = ijk = -1 $$
+
+Scalar and vector parts of a quaternion:
+$$ q = q_0 + q_1 i + q_2 j + q_3 k = (q_0, q_1, q_2, q_3) = (s, v) $$
+where $ s = q_0 $ is the scalar part and $ v = (q_1, q_2, q_3) $ is the vector part.
+
+all operations are defined: addition, subtraction, multiplication ...
+
+#### Unit Quaternions
+- Unit quaternion q:
+   - represents a rotation in $ \theta $ around an axis $ a $
+$$ q = [q_0, q_1, q_2, q_3] = \langle s, V \rangle $$
+$$ q = \langle \cos \frac{\theta}{2}, a \sin \frac{\theta}{2} \rangle $$
+
+Properties of unit quaternions:
+- it's possible to concatenate rotations
+- it's possible to interpolate between two rotations
+
+#### Linear Interpolation of Quaternions (LERP)
+LERP is a method for interpolating between two quaternions. The path between the two quaternions is a straight line on the unit quaternion sphere.
+This is not smooth at control points ("hiccups")
+
+#### Spherical Linear Interpolation (SLERP)
+SLERP is a method for interpolating between two unit quaternions. It ensures that the interpolated quaternions lie on the unit sphere and the shortest path between the two quaternions is taken.
+
+$$ SLERP(t , q_1 , q_2) = q_1 (q_1^* q_2)^t $$
+where:
+- $ q_1^* $ is the conjugate of $ q_1 $
+- $ t $ is the interpolation parameter (0 <= t <= 1)
+
+
+## Rigging
+Rigging is the process of creating a skeleton for a 3D model to enable animation. The skeleton consists of bones and joints that define the structure of the model and how it can move.
+
+It's very difficult to operate on the vertices of a 3D model directly. Instead, we can use a skeleton to control the movement of the model.
+
+### Bones and Joints
+- **Bones**: The rigid segments of the skeleton that define the structure of the model.
+   - Attribute every vertex to a bone
+   - if a bone moves, the vertices move with it with the same transformation
+- **Joints**: The connections between bones that allow movement.
+   - Joints define how bones can rotate and translate relative to each other.
+
+This leads to ridgid body transformations leading sharp edges at the joints or discontinuities in the lines.
+
+We want rigid body transformations but smooth transitions at the mesh level.
+
+
+## Skinning
+Skinning is the process of deforming a 3D model based on the movement of the skeleton. The skin of the model is attached to the bones, and as the bones move, the skin deforms accordingly.
+
+### Linear Blend Skinning (LBS)
+In the transition region between two bones, the vertices are influenced by both bones. The influence of each bone is determined by weights assigned to the vertices (in the blend region).
+
+$$ v_j = \sum_{i=1}^{n} w_{ij} T_i(v) $$
+
+Where:
+- $ v_j $ is the deformed vertex position.
+- $ w_{ij} $ is the weight of bone $ i $ on vertex $ j $ and the sum of weights for each vertex much be 1 (normalized).
+- $ T_i(v) $ is the transformation of bone $ i $ on vertex $ v $.
+
+### Interpolating the normal vectors
+- $ n_j = \sum_{i=1}^{n} w_{ij} T_i^{-T}(n_j) $
+
+Where:
+- $ n_j $ is the deformed normal vector.
+- $ T_i^{-T}(n_j) $ is the inverse transpose of the transformation matrix of bone $ i $ on normal $ n_j $.
+
+
+Interolate the normals as well as the vertex positions. (the normals are used for shading and lighting so recalculating them is important)
+
+## Motion Capture
+Motion capture is the process of recording the movement of objects or people. It is commonly used in animation, sports, and medicine to capture realistic movements.
+
+## Blend Shapes
+Create a set of target shapes and interpolate between them to create a smooth transition between different facial expressions.
+
+Starting with a neutral face, we can create target shapes for different expressions (e.g., smile, frown, surprise). By interpolating between these target shapes, we can create a wide range of facial expressions.
+
+Express all other faces as differences from the neutral face.
+
+$$ \triangle P_i = P_i - P_{neutral} $$ 
+
+This gives a vector representation of the face expressions.
+
+$$ P_{new} = P_{neutral} + \sum_{i=1}^{n} w_i \triangle P_i $$
+
+Where:
+- $ P_{new} $ is the new vertex position.
+- $ P_{neutral} $ is the neutral vertex position.
+- $ w_i $ is the weight of the $ i $-th expression.
+
+You can transition between different expressions by changing the weights gradually.
+
+You express this in matrix notation:
+
+$$ P_{new} = P_{neutral} + [ \triangle P_1, \triangle P_2, ... \triangle P_n ] \begin{bmatrix} w_1 \\ w_2 \\ ... \\ w_n \end{bmatrix} $$
+
+Each column of the matrix is a target shape and the weights are the coefficients of the linear combination.
+
+### How to set the weights?
+- Manually: An artist can set the weights based on the desired expression.
+Sometimes the face is split into regions and the weights are set for each region.
 
