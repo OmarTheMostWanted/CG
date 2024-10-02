@@ -53,6 +53,14 @@ Mesh mesh;
 // Declare your own global variables here:
 int myVariableThatServesNoPurpose;
 
+//x-coordinate of the first vertex of each triangle
+float xCoordinateOfFirstVertexOfTriangle = 0.0f;
+float xCoordinateOfFirstVertexOfTriangleStep = 0.01f;
+bool xCoordinateOfFirstVertexOfTriangleIncreasing = true;
+
+float rotationAngleOfFace = 0.0f;
+float scaleOfFace = 1.0f;
+
 ////////// Draw Functions
 
 // function to draw coordinate axes with a certain length (1 as a default)
@@ -66,15 +74,15 @@ void drawCoordSystem(const float length = 1)
     glDisable(GL_LIGHTING);
     // draw axes
     glBegin(GL_LINES);
-    glColor3f(1, 0, 0);
+    glColor3f(1, 0, 0); // red x-axis
     glVertex3f(0, 0, 0);
     glVertex3f(length, 0, 0);
 
-    glColor3f(0, 1, 0);
+    glColor3f(0, 1, 0); // green y-axis
     glVertex3f(0, 0, 0);
     glVertex3f(0, length, 0);
 
-    glColor3f(0, 0, 1);
+    glColor3f(0, 0, 1); // blue z-axis
     glVertex3f(0, 0, 0);
     glVertex3f(0, 0, length);
     glEnd();
@@ -90,7 +98,7 @@ void drawCoordSystem(const float length = 1)
 void drawTriangle()
 {
     // A simple example of a drawing function for a triangle
-    // 1) Try changing its color to red
+    // 1) Try changing its color to gray
     // 2) Try changing its vertex positions
     // 3) Add a second triangle in blue
     // 4) Add a global variable (initialized at 0), which represents the
@@ -98,13 +106,37 @@ void drawTriangle()
     // 5) Go to the function animate and increment this variable
     //   by a small value - observe the animation.
 
-    glColor3f(1, 1, 1);
+    //gray
+    glColor3f(0.5, 1, 0.5);
     glNormal3f(0, 0, 1);
     glBegin(GL_TRIANGLES);
-    glVertex3f(0, 0, 0);
-    glVertex3f(1, 0, 0);
-    glVertex3f(1, 1, 0);
+    glVertex3f(xCoordinateOfFirstVertexOfTriangle, 0, 0);
+    glVertex3f(1, 1, 1);
+    glVertex3f(1, 0, 1);
     glEnd();
+
+    glColor3f(1, 0.5, 0.5);
+
+    glBegin(GL_TRIANGLES);
+    glVertex3f(xCoordinateOfFirstVertexOfTriangle, 0, 0);
+    glVertex3f(0, 1, 1);
+    glVertex3f(1, 1, 1);
+    glEnd();
+
+    glColor3f(0.5, 0.5, 1);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(xCoordinateOfFirstVertexOfTriangle, 0, 0);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0, 1, 1);
+    glEnd();
+
+    glColor3f(0.5, 0.5, 0.5);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(xCoordinateOfFirstVertexOfTriangle, 0, 0);
+    glVertex3f(1, 0, 1);
+    glVertex3f(0, 0, 1);
+    glEnd();
+
 }
 
 void drawUnitFace(const glm::mat4& transformMatrix)
@@ -130,6 +162,28 @@ void drawUnitFace(const glm::mat4& transformMatrix)
     //  For example (rotate 90 degrees around the x axis):
     //  glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
 
+
+    //create matrix to rotate the face arround the z axis
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngleOfFace), glm::vec3(0, 0, 1));
+    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scaleOfFace, scaleOfFace, scaleOfFace));
+
+    // multiply the rotation matrix with the transform matrix
+    glm::mat4 transform = transformMatrix * rotation * scale;
+
+    // Push the current matrix onto the stack
+    glPushMatrix();
+
+    glMultMatrixf(glm::value_ptr(transform));
+
+    glColor3f(1, 1, 0);
+    glNormal3f(0, 0, 1);
+    glBegin(GL_QUADS); // oriented along the z axis
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, 0, 1);
+    glVertex3f(0, 1, 1);
+    glVertex3f(0, 1, 0);
+    glEnd();
+    glPopMatrix();
 }
 
 void drawUnitCube(const glm::mat4& transformMatrix)
@@ -203,7 +257,8 @@ void display()
         drawTriangle();
         break;
     case DisplayModeType::FACE:
-        drawUnitFace(glm::mat4(1.0f)); // mat4(1.0f) = identity matrix
+            drawCoordSystem();
+            drawUnitFace(glm::mat4(1.0f)); // mat4(1.0f) = identity matrix
         break;
         // ...
     default:
@@ -211,11 +266,26 @@ void display()
     }
 }
 
+
+
 /**
  * Animation
  */
 void animate()
 {
+
+    //twerking triangle
+    if (xCoordinateOfFirstVertexOfTriangleIncreasing) {
+        xCoordinateOfFirstVertexOfTriangle += xCoordinateOfFirstVertexOfTriangleStep;
+    } else {
+        xCoordinateOfFirstVertexOfTriangle -= xCoordinateOfFirstVertexOfTriangleStep;
+    }
+
+    if (xCoordinateOfFirstVertexOfTriangle > 1.0f) {
+        xCoordinateOfFirstVertexOfTriangleIncreasing = false;
+    } else if (xCoordinateOfFirstVertexOfTriangle < 0.0f) {
+        xCoordinateOfFirstVertexOfTriangleIncreasing = true;
+    }
 }
 
 // Take keyboard input into account.
@@ -294,7 +364,7 @@ void imgui()
     ImGui::Combo("Display Mode", &current_mode, displayModeNames.data(), displayModeNames.size());
 
     // set display mode
-    displayMode = displayModes[current_mode];
+    displayMode = displayModes[static_cast<unsigned long>(current_mode)];
 
     ImGui::Checkbox("Lighting Enabled", &lighting_enabled);
 
@@ -302,6 +372,15 @@ void imgui()
         glEnable(GL_LIGHTING);
     } else {
         glDisable(GL_LIGHTING);
+    }
+
+    if (displayMode == DisplayModeType::TRIANGLE) {
+        ImGui::SliderFloat("X Coordinate Of First Vertex Of Triangle Step", &xCoordinateOfFirstVertexOfTriangleStep, 0.0f, 0.05f);
+    }
+
+    if (displayMode == DisplayModeType::FACE) {
+        ImGui::SliderFloat("Rotation AngleOfFace", &rotationAngleOfFace, 0.0f, 360.0f);
+        ImGui::SliderFloat("Scale Of Face", &scaleOfFace, 0.0f, 2.0f);
     }
 
     ImGui::Separator();
