@@ -45,5 +45,8 @@ install_manifest.txt
 Makefile
 Makefile.cmake
 *cmake-build-debug*
-*cmake-build-release*\
+*cmake-build-release*
 build
+
+
+
