@@ -1,13 +1,17 @@
 // Disable compiler warnings in third-party code (which we cannot change).
 #include <framework/disable_all_warnings.h>
+
 DISABLE_WARNINGS_PUSH()
+
 #include <glad/glad.h>
 // Include glad before glfw3.
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 DISABLE_WARNINGS_POP()
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -41,12 +45,12 @@ enum class DisplayModeType {
 
 bool show_imgui = true;
 bool lighting_enabled = false;
-DisplayModeType displayMode = DisplayModeType::TRIANGLE;
-constexpr glm::ivec2 resolution { 800, 800 };
+DisplayModeType displayMode = DisplayModeType::ARM;
+constexpr glm::ivec2 resolution{800, 800};
 std::unique_ptr<Window> pWindow;
 std::unique_ptr<Trackball> pTrackball;
 
-glm::vec4 lightPos { 1.0f, 1.0f, 0.4f, 1.0f };
+glm::vec4 lightPos{1.0f, 1.0f, 0.4f, 1.0f};
 Mesh mesh;
 
 
@@ -64,8 +68,7 @@ float scaleOfFace = 1.0f;
 ////////// Draw Functions
 
 // function to draw coordinate axes with a certain length (1 as a default)
-void drawCoordSystem(const float length = 1)
-{
+void drawCoordSystem(const float length = 1) {
     // draw simply colored axes
 
     // remember all states of the GPU
@@ -95,8 +98,7 @@ void drawCoordSystem(const float length = 1)
  * Several drawing functions for you to work on
  */
 
-void drawTriangle()
-{
+void drawTriangle() {
     // A simple example of a drawing function for a triangle
     // 1) Try changing its color to gray
     // 2) Try changing its vertex positions
@@ -139,8 +141,7 @@ void drawTriangle()
 
 }
 
-void drawUnitFace(const glm::mat4& transformMatrix)
-{
+void drawUnitFace(const glm::mat4 &transformMatrix) {
     // 1) Draw a unit quad in the x,y plane oriented along the z axis
     // 2) Make sure the orientation of the vertices is positive (counterclock wise)
     // 3) What happens if the order is inversed?
@@ -186,17 +187,50 @@ void drawUnitFace(const glm::mat4& transformMatrix)
     glPopMatrix();
 }
 
-void drawUnitCube(const glm::mat4& transformMatrix)
-{
+void drawUnitCube(const glm::mat4 &transformMatrix) {
     // 1) Draw a cube using your function drawUnitFace. Use glm::translate(Matrix, Vector)
     //    and glm::rotate(Matrix, Angle, Vector) to create the transformation matrices
     //    passed to drawUnitFace.
     // 2) Transform your cube by the given transformation matrix.
 
+    //draw a cube by drawing 6 faces
+    glm::mat4 translation = glm::translate(transformMatrix, glm::vec3(-1, 0, 0));
+    //drawUnitFace(transformMatrix * translation * rotation);
+    drawUnitFace(transformMatrix * translation); // face along the z axis
+    // rotate the face 90 degrees around the y axis
+    glm::mat4 rotation = glm::rotate(transformMatrix, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+    //translate but one in the x direction
+    drawUnitFace(transformMatrix * rotation);
+    drawUnitFace(transformMatrix * rotation * -rotation);
+    // rotate the face 90 degrees around the x axis
+    rotation = glm::rotate(transformMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+    drawUnitFace(transformMatrix * rotation); // face along the y axis
+
+
+    drawUnitFace(transformMatrix);
+
+    // transalte by one in the z direction
+    translation = glm::translate(transformMatrix, glm::vec3(0, 0, 1));
+    // rotate the face 90 degrees around the y axis
+    rotation = glm::rotate(transformMatrix, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+    drawUnitFace(transformMatrix * translation * rotation);
+
+    // rotate the face 90 degrees around the x axis
+    rotation = glm::rotate(transformMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+    //rotate the face 90 degrees around the y axis
+
+    auto rotation_y = glm::rotate(rotation, glm::radians(90.0f), glm::vec3(0, 1, 0));
+    drawUnitFace(transformMatrix * translation * rotation_y);
+
+
 }
 
-void drawArm()
-{
+float upperArmAngle = 0.0f;
+float forearmAngle = 0.0f;
+float handAngle = 0.0f;
+
+
+void drawArm() {
     // Produce a three-unit arm (upperarm, forearm, hand) making use of your function
     // drawUnitCube to define each of them
     // 1) Define 3 global variables that control the angles between the arm parts and add
@@ -209,10 +243,27 @@ void drawArm()
     // 3 Optional) make an animated snake out of these boxes
     //(an arm with 10 joints that moves using the animate function)
 
+    // Draw upper arm
+    glm::mat4 upperArmTransform = glm::mat4(1.0f);
+    upperArmTransform = glm::rotate(upperArmTransform, glm::radians(upperArmAngle), glm::vec3(0, 0, 1));
+    upperArmTransform = glm::scale(upperArmTransform, glm::vec3(1.0f, 3.0f, 1.0f));
+    drawUnitCube(upperArmTransform);
+
+    // Draw forearm
+    glm::mat4 forearmTransform = glm::translate(upperArmTransform, glm::vec3(0, 3.0f, 0));
+    forearmTransform = glm::rotate(forearmTransform, glm::radians(forearmAngle), glm::vec3(0, 0, 1));
+    forearmTransform = glm::scale(forearmTransform, glm::vec3(1.0f, 2.0f, 1.0f));
+    drawUnitCube(forearmTransform);
+
+    // Draw hand
+    glm::mat4 handTransform = glm::translate(forearmTransform, glm::vec3(0, 2.0f, 0));
+    handTransform = glm::rotate(handTransform, glm::radians(handAngle), glm::vec3(0, 0, 1));
+    handTransform = glm::scale(handTransform, glm::vec3(1.0f, 1.0f, 1.0f));
+    drawUnitCube(handTransform);
+
 }
 
-void drawLight()
-{
+void drawLight() {
     // 1) Draw a cube at the light's position lightPos using your drawUnitCube function.
     //    To make the light source bright, follow the drawCoordSystem function
     //    To deactivate the lighting temporarily and draw it in yellow.
@@ -226,10 +277,27 @@ void drawLight()
     // 4) OPTIONAL
     //    Draw a sphere (consisting of triangles) instead of a cube.
 
+    // Remember all states of the GPU
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    // Deactivate the lighting state
+    glDisable(GL_LIGHTING);
+
+    // Set the color to yellow
+    glColor3f(1.0f, 1.0f, 0.0f);
+
+    // Create a transformation matrix for the light position
+    glm::mat4 lightTransform = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
+
+    // Draw the cube at the light's position
+    drawUnitCube(lightTransform);
+
+    // Reset to previous state
+    glPopAttrib();
+
 }
 
-void drawMesh()
-{
+void drawMesh() {
     // 1) Use the mesh data structure;
     //    Each triangle is defined with 3 consecutive indices in the meshTriangles table.
     //    These indices correspond to vertices stored in the meshVertices table.
@@ -245,34 +313,38 @@ void drawMesh()
 
 }
 
-void display()
-{
+void display() {
     // set the light to the right position
     //  glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(lightPos));
     drawLight();
 
     switch (displayMode) {
-    case DisplayModeType::TRIANGLE:
-        drawCoordSystem();
-        drawTriangle();
-        break;
-    case DisplayModeType::FACE:
+        case DisplayModeType::TRIANGLE:
+            drawCoordSystem();
+            drawTriangle();
+            break;
+        case DisplayModeType::FACE:
             drawCoordSystem();
             drawUnitFace(glm::mat4(1.0f)); // mat4(1.0f) = identity matrix
-        break;
-        // ...
-    default:
-        break;
+            break;
+        case DisplayModeType::CUBE:
+            drawCoordSystem();
+            drawUnitCube(glm::mat4(1.0f));
+            break;
+        case DisplayModeType::ARM:
+            drawCoordSystem();
+            drawArm();
+            break;
+        default:
+            break;
     }
 }
-
 
 
 /**
  * Animation
  */
-void animate()
-{
+void animate() {
 
     //twerking triangle
     if (xCoordinateOfFirstVertexOfTriangleIncreasing) {
@@ -289,8 +361,7 @@ void animate()
 }
 
 // Take keyboard input into account.
-void keyboard(int key, int /* scancode */, int action, int /* mods */)
-{
+void keyboard(int key, int /* scancode */, int action, int /* mods */) {
     glm::dvec2 cursorPos = pWindow->getCursorPos();
     std::cout << "Key " << key << " pressed at " << cursorPos.x << ", " << cursorPos.y << "\n";
 
@@ -299,46 +370,69 @@ void keyboard(int key, int /* scancode */, int action, int /* mods */)
     }
 
     switch (key) {
-    case GLFW_KEY_1: {
-        displayMode = DisplayModeType::TRIANGLE;
-        break;
-    }
-    case GLFW_KEY_2: {
-        displayMode = DisplayModeType::FACE;
-        break;
-    }
-    case GLFW_KEY_3: {
-        displayMode = DisplayModeType::CUBE;
-        break;
-    }
-    case GLFW_KEY_4: {
-        displayMode = DisplayModeType::ARM;
-        break;
-    }
-    case GLFW_KEY_5: {
-        displayMode = DisplayModeType::MESH;
-        break;
-    }
-    case GLFW_KEY_ESCAPE: {
-        pWindow->close();
-        break;
-    }
-    case GLFW_KEY_L: {
-        // Turn lighting on.
-        if (pWindow->isKeyPressed(GLFW_KEY_LEFT_SHIFT) || pWindow->isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
-            lighting_enabled = true;
-            glEnable(GL_LIGHTING);
-        } else {
-            lighting_enabled = false;
-            glDisable(GL_LIGHTING);
+        case GLFW_KEY_1: {
+            displayMode = DisplayModeType::TRIANGLE;
+            break;
         }
-        break;
-    }
+        case GLFW_KEY_2: {
+            displayMode = DisplayModeType::FACE;
+            break;
+        }
+        case GLFW_KEY_3: {
+            displayMode = DisplayModeType::CUBE;
+            break;
+        }
+        case GLFW_KEY_4: {
+            displayMode = DisplayModeType::ARM;
+            break;
+        }
+        case GLFW_KEY_5: {
+            displayMode = DisplayModeType::MESH;
+            break;
+        }
+        case GLFW_KEY_Q: {
+            upperArmAngle += 5.0f;
+            break;
+        }
+        case GLFW_KEY_A: {
+            upperArmAngle -= 5.0f;
+            break;
+        }
+        case GLFW_KEY_W: {
+            forearmAngle += 5.0f;
+            break;
+        }
+        case GLFW_KEY_S: {
+            forearmAngle -= 5.0f;
+            break;
+        }
+        case GLFW_KEY_E: {
+            handAngle += 5.0f;
+            break;
+        }
+        case GLFW_KEY_D: {
+            handAngle -= 5.0f;
+            break;
+        }
+        case GLFW_KEY_ESCAPE: {
+            pWindow->close();
+            break;
+        }
+        case GLFW_KEY_L: {
+            // Turn lighting on.
+            if (pWindow->isKeyPressed(GLFW_KEY_LEFT_SHIFT) || pWindow->isKeyPressed(GLFW_KEY_RIGHT_SHIFT)) {
+                lighting_enabled = true;
+                glEnable(GL_LIGHTING);
+            } else {
+                lighting_enabled = false;
+                glDisable(GL_LIGHTING);
+            }
+            break;
+        }
     };
 }
 
-void imgui()
-{
+void imgui() {
 
     if (!show_imgui)
         return;
@@ -347,14 +441,14 @@ void imgui()
     ImGui::Text("Press \\ to show/hide this menu");
 
     // Declare display modes and names
-    std::array displayModeNames { "1: TRIANGLE", "2: FACE", "3: CUBE", "4: ARM", "5: MESH" };
+    std::array displayModeNames{"1: TRIANGLE", "2: FACE", "3: CUBE", "4: ARM", "5: MESH"};
 
-    const std::array displayModes {
-        DisplayModeType::TRIANGLE,
-        DisplayModeType::FACE,
-        DisplayModeType::CUBE,
-        DisplayModeType::ARM,
-        DisplayModeType::MESH
+    const std::array displayModes{
+            DisplayModeType::TRIANGLE,
+            DisplayModeType::FACE,
+            DisplayModeType::CUBE,
+            DisplayModeType::ARM,
+            DisplayModeType::MESH
     };
 
     // get the index of the current display mode, as current mode
@@ -423,9 +517,10 @@ void imgui()
 // STOP READING //STOP READING //STOP READING
 
 void displayInternal(void);
-void reshape(const glm::ivec2&);
-void init()
-{
+
+void reshape(const glm::ivec2 &);
+
+void init() {
     // Initialize viewpoint
     pTrackball->printHelp();
     reshape(resolution);
@@ -453,8 +548,7 @@ void init()
 }
 
 // Program entry point. Everything starts here.
-int main(int /* argc */, char** argv)
-{
+int main(int /* argc */, char **argv) {
     pWindow = std::make_unique<Window>(argv[0], resolution, OpenGLVersion::GL2);
     pTrackball = std::make_unique<Trackball>(pWindow.get(), glm::radians(50.0f));
     pWindow->registerKeyCallback(keyboard);
@@ -474,8 +568,7 @@ int main(int /* argc */, char** argv)
 }
 
 // OpenGL helpers. You don't need to touch these.
-void displayInternal(void)
-{
+void displayInternal(void) {
     // Clear screen
     glViewport(0, 0, pWindow->getWindowSize().x, pWindow->getWindowSize().y);
     glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -493,8 +586,8 @@ void displayInternal(void)
     animate();
     display();
 }
-void reshape(const glm::ivec2& size)
-{
+
+void reshape(const glm::ivec2 &size) {
     // Called when the window is resized.
     // Update the viewport and projection matrix.
     glViewport(0, 0, size.x, size.y);
