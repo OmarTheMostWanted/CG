@@ -45,7 +45,7 @@ enum class DisplayModeType {
 
 bool show_imgui = true;
 bool lighting_enabled = false;
-DisplayModeType displayMode = DisplayModeType::ARM;
+DisplayModeType displayMode = DisplayModeType::CUBE;
 constexpr glm::ivec2 resolution{800, 800};
 std::unique_ptr<Window> pWindow;
 std::unique_ptr<Trackball> pTrackball;
@@ -64,6 +64,10 @@ bool xCoordinateOfFirstVertexOfTriangleIncreasing = true;
 
 float rotationAngleOfFace = 0.0f;
 float scaleOfFace = 1.0f;
+glm::vec3 faceColor = glm::vec3(5.0f, 5.0f, 5.0f);
+
+float rotationAngleOfCube = 0.0f;
+float scaleOfCube = 1.0f;
 
 ////////// Draw Functions
 
@@ -141,6 +145,7 @@ void drawTriangle() {
 
 }
 
+
 void drawUnitFace(const glm::mat4 &transformMatrix) {
     // 1) Draw a unit quad in the x,y plane oriented along the z axis
     // 2) Make sure the orientation of the vertices is positive (counterclock wise)
@@ -176,7 +181,7 @@ void drawUnitFace(const glm::mat4 &transformMatrix) {
 
     glMultMatrixf(glm::value_ptr(transform));
 
-    glColor3f(1, 1, 0);
+    glColor3f(faceColor.r, faceColor.g, faceColor.b);
     glNormal3f(0, 0, 1);
     glBegin(GL_QUADS); // oriented along the z axis
     glVertex3f(0, 0, 0);
@@ -193,35 +198,61 @@ void drawUnitCube(const glm::mat4 &transformMatrix) {
     //    passed to drawUnitFace.
     // 2) Transform your cube by the given transformation matrix.
 
+
+
+    faceColor = glm::vec3(1.0f, 0.0f, 0.0f);
     //draw a cube by drawing 6 faces
-    glm::mat4 translation = glm::translate(transformMatrix, glm::vec3(-1, 0, 0));
-    //drawUnitFace(transformMatrix * translation * rotation);
-    drawUnitFace(transformMatrix * translation); // face along the z axis
-    // rotate the face 90 degrees around the y axis
-    glm::mat4 rotation = glm::rotate(transformMatrix, glm::radians(-90.0f), glm::vec3(0, 1, 0));
-    //translate but one in the x direction
-    drawUnitFace(transformMatrix * rotation);
-    drawUnitFace(transformMatrix * rotation * -rotation);
-    // rotate the face 90 degrees around the x axis
-    rotation = glm::rotate(transformMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
-    drawUnitFace(transformMatrix * rotation); // face along the y axis
+    //face 1 along the Z and Y axis
+    glm::mat4 face1 = transformMatrix;
 
+    drawUnitFace(face1);
 
-    drawUnitFace(transformMatrix);
+    faceColor = glm::vec3(1.0f, 0.5f, 0.0f);
 
-    // transalte by one in the z direction
-    translation = glm::translate(transformMatrix, glm::vec3(0, 0, 1));
-    // rotate the face 90 degrees around the y axis
-    rotation = glm::rotate(transformMatrix, glm::radians(-90.0f), glm::vec3(0, 1, 0));
-    drawUnitFace(transformMatrix * translation * rotation);
+    //face 2, rotate face 1 by 90 degrees
+    glm::mat4  face2 = glm::rotate(face1, glm::radians(90.0f), glm::vec3(0, 0, 1));
+    drawUnitFace( face2);
 
-    // rotate the face 90 degrees around the x axis
-    rotation = glm::rotate(transformMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
-    //rotate the face 90 degrees around the y axis
+    faceColor = glm::vec3(0.0f, 1.0f, 0.5f);
 
-    auto rotation_y = glm::rotate(rotation, glm::radians(90.0f), glm::vec3(0, 1, 0));
-    drawUnitFace(transformMatrix * translation * rotation_y);
+    //face 3, translate face 2 by 1  and rotate it by 90 degrees
+    glm::mat4  face3 = glm::translate(face2 , glm::vec3(0, 1, 0));
+    face3 = glm::rotate(face3, glm::radians(-90.0f), glm::vec3(0, 0, 1));
+    drawUnitFace( face3);
 
+    faceColor = glm::vec3(0.0f, 0.5f, 1.0f);
+
+    //face 4, translate face 3 and rotate it by 90 degrees
+    glm::mat4  face4 = glm::translate(face3, glm::vec3(0, 1, 0));
+    face4 = glm::rotate(face4, glm::radians(-90.0f), glm::vec3(0, 0, 1));
+    drawUnitFace(face4);
+
+    faceColor = glm::vec3(0.5f, 0.0f, 1.0f);
+
+    //face 5, rotate face 4 by 90 degrees
+    glm::mat4  face5 = glm::rotate(face4, glm::radians(90.0f), glm::vec3(0, 1, 0));
+    drawUnitFace(face5);
+
+    faceColor = glm::vec3(1.0f, 8.0f, 0.5f);
+
+    //face 6, translate face 5 by 1
+    glm::mat4  face6 = glm::translate(face5, glm::vec3(-1, 0 , 0));
+    drawUnitFace(face6);
+
+//
+//    //face 4, translate face 1 by 1 along the x axis
+//    glm::mat4  face4 = glm::translate(glm::mat4(1.0f), glm::vec3(-1, 0, 0));
+//    drawUnitFace(transformMatrix * face4);
+//
+//    //face 5, translate face 1 by 1 along the y axis and rotate it by 90 degrees around the z axis
+//    glm::mat4  face5 = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1, 0));
+//    face5 = glm::rotate(face5, glm::radians(90.0f), glm::vec3(0, 0, 1));
+//    drawUnitFace(transformMatrix * face5);
+//
+//    //face 6, translate face 1 by 1 along the z axis and rotate it by 90 degrees around the y axis
+//    glm::mat4  face6 = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 1));
+//    face6 = glm::rotate(face6, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+//    drawUnitFace(transformMatrix * face6);
 
 }
 
@@ -244,22 +275,22 @@ void drawArm() {
     //(an arm with 10 joints that moves using the animate function)
 
     // Draw upper arm
-    glm::mat4 upperArmTransform = glm::mat4(1.0f);
-    upperArmTransform = glm::rotate(upperArmTransform, glm::radians(upperArmAngle), glm::vec3(0, 0, 1));
-    upperArmTransform = glm::scale(upperArmTransform, glm::vec3(1.0f, 3.0f, 1.0f));
-    drawUnitCube(upperArmTransform);
-
-    // Draw forearm
-    glm::mat4 forearmTransform = glm::translate(upperArmTransform, glm::vec3(0, 3.0f, 0));
-    forearmTransform = glm::rotate(forearmTransform, glm::radians(forearmAngle), glm::vec3(0, 0, 1));
-    forearmTransform = glm::scale(forearmTransform, glm::vec3(1.0f, 2.0f, 1.0f));
-    drawUnitCube(forearmTransform);
-
-    // Draw hand
-    glm::mat4 handTransform = glm::translate(forearmTransform, glm::vec3(0, 2.0f, 0));
-    handTransform = glm::rotate(handTransform, glm::radians(handAngle), glm::vec3(0, 0, 1));
-    handTransform = glm::scale(handTransform, glm::vec3(1.0f, 1.0f, 1.0f));
-    drawUnitCube(handTransform);
+//    glm::mat4 upperArmTransform = glm::mat4(1.0f);
+//    upperArmTransform = glm::rotate(upperArmTransform, glm::radians(upperArmAngle), glm::vec3(0, 0, 1));
+//    upperArmTransform = glm::scale(upperArmTransform, glm::vec3(1.0f, 3.0f, 1.0f));
+//    drawUnitCube(upperArmTransform);
+//
+//    // Draw forearm
+//    glm::mat4 forearmTransform = glm::translate(upperArmTransform, glm::vec3(0, 3.0f, 0));
+//    forearmTransform = glm::rotate(forearmTransform, glm::radians(forearmAngle), glm::vec3(0, 0, 1));
+//    forearmTransform = glm::scale(forearmTransform, glm::vec3(1.0f, 2.0f, 1.0f));
+//    drawUnitCube(forearmTransform);
+//
+//    // Draw hand
+//    glm::mat4 handTransform = glm::translate(forearmTransform, glm::vec3(0, 2.0f, 0));
+//    handTransform = glm::rotate(handTransform, glm::radians(handAngle), glm::vec3(0, 0, 1));
+//    handTransform = glm::scale(handTransform, glm::vec3(1.0f, 1.0f, 1.0f));
+//    drawUnitCube(handTransform);
 
 }
 
@@ -277,23 +308,23 @@ void drawLight() {
     // 4) OPTIONAL
     //    Draw a sphere (consisting of triangles) instead of a cube.
 
-    // Remember all states of the GPU
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-    // Deactivate the lighting state
-    glDisable(GL_LIGHTING);
-
-    // Set the color to yellow
-    glColor3f(1.0f, 1.0f, 0.0f);
-
-    // Create a transformation matrix for the light position
-    glm::mat4 lightTransform = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
-
-    // Draw the cube at the light's position
-    drawUnitCube(lightTransform);
-
-    // Reset to previous state
-    glPopAttrib();
+//    // Remember all states of the GPU
+//    glPushAttrib(GL_ALL_ATTRIB_BITS);
+//
+//    // Deactivate the lighting state
+//    glDisable(GL_LIGHTING);
+//
+//    // Set the color to yellow
+//    glColor3f(1.0f, 1.0f, 0.0f);
+//
+//    // Create a transformation matrix for the light position
+//    glm::mat4 lightTransform = glm::translate(glm::mat4(1.0f), glm::vec3(lightPos));
+//
+//    // Draw the cube at the light's position
+//    drawUnitCube(lightTransform);
+//
+//    // Reset to previous state
+//    glPopAttrib();
 
 }
 
@@ -328,14 +359,9 @@ void display() {
             drawUnitFace(glm::mat4(1.0f)); // mat4(1.0f) = identity matrix
             break;
         case DisplayModeType::CUBE:
-            drawCoordSystem();
-            drawUnitCube(glm::mat4(1.0f));
-            break;
-        case DisplayModeType::ARM:
-            drawCoordSystem();
-            drawArm();
-            break;
-        default:
+            glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(rotationAngleOfCube), glm::vec3(0, 0, 1));
+            glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(scaleOfCube, scaleOfCube, scaleOfCube));
+            drawUnitCube(rotation * scale);
             break;
     }
 }
@@ -470,11 +496,21 @@ void imgui() {
 
     if (displayMode == DisplayModeType::TRIANGLE) {
         ImGui::SliderFloat("X Coordinate Of First Vertex Of Triangle Step", &xCoordinateOfFirstVertexOfTriangleStep, 0.0f, 0.05f);
+    } else {
+        xCoordinateOfFirstVertexOfTriangleStep = 0.01f;
     }
 
     if (displayMode == DisplayModeType::FACE) {
         ImGui::SliderFloat("Rotation AngleOfFace", &rotationAngleOfFace, 0.0f, 360.0f);
         ImGui::SliderFloat("Scale Of Face", &scaleOfFace, 0.0f, 2.0f);
+    } else {
+        rotationAngleOfFace = 0.0f;
+        scaleOfFace = 1.0f;
+    }
+
+    if (displayMode == DisplayModeType::CUBE) {
+        ImGui::SliderFloat("Rotation of Cube arround the z axis", &rotationAngleOfCube, 0.0f, 360.0f);
+        ImGui::SliderFloat("Scale Of Cube", &scaleOfCube, 0.0f, 2.0f);
     }
 
     ImGui::Separator();
