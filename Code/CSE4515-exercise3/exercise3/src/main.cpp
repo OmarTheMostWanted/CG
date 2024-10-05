@@ -582,6 +582,12 @@ int main(int argc, char** argv)
 
                             // === SET YOUR DIFFUSE TOON UNIFORMS HERE ===
                             // Values that you may want to pass to the shader are stored in light, shadingData.
+
+                            glUniform3fv(toonDiffuseShader.getUniformLocation("lightPos"), 1, glm::value_ptr(light.position));
+                            glUniform3fv(toonDiffuseShader.getUniformLocation("lightColor"), 1, glm::value_ptr(light.color));
+                            glUniform3fv(toonDiffuseShader.getUniformLocation("kd"), 1, glm::value_ptr(shadingData.kd));
+                            glUniform1i(toonDiffuseShader.getUniformLocation("toonDiscretize"), shadingData.toonDiscretize);
+
                             render(toonDiffuseShader);
                         }
                         if (toonLightingSpecular) {
@@ -589,6 +595,16 @@ int main(int argc, char** argv)
 
                             // === SET YOUR SPECULAR TOON UNIFORMS HERE ===
                             // Values that you may want to pass to the shader are stored in light, shadingData and cameraPos.
+                            glUniform3fv(toonSpecularShader.getUniformLocation("lightPos"), 1, glm::value_ptr(light.position));
+//                            glUniform3fv(toonSpecularShader.getUniformLocation("lightColor"), 1, glm::value_ptr(light.color));
+
+//                            glUniform3fv(toonSpecularShader.getUniformLocation("ks"), 1, glm::value_ptr(shadingData.ks));
+                            glUniform1f(toonSpecularShader.getUniformLocation("shininess"), shadingData.shininess);
+
+                            glUniform1f(toonSpecularShader.getUniformLocation("toonSpecularThreshold"), shadingData.toonSpecularThreshold);
+                            // viewPos
+                            glUniform3fv(toonSpecularShader.getUniformLocation("viewPos"), 1, glm::value_ptr(cameraPos));
+
                             render(toonSpecularShader);
                         }
                     }
@@ -600,6 +616,9 @@ int main(int argc, char** argv)
                         // Values that you may want to pass to the shader include light.position, light.color and shadingData.kd.
                         // glUniform1f(lambertShader.getUniformLocation("floatName"), 1, floatValue);
                         // glUniform3fv(lambertShader.getUniformLocation("vecName"), 1, glm::value_ptr(glmVector));
+                        glUniform3fv(lambertShader.getUniformLocation("lightPos"), 1, glm::value_ptr(light.position));
+                        glUniform3fv(lambertShader.getUniformLocation("lightColor"), 1, glm::value_ptr(light.color));
+                        glUniform3fv(lambertShader.getUniformLocation("kd"), 1, glm::value_ptr(shadingData.kd));
                         render(lambertShader);
                     }
                     if (phongSpecularLighting || blinnPhongSpecularLighting) {
@@ -608,6 +627,13 @@ int main(int argc, char** argv)
 
                             // === SET YOUR PHONG/BLINN PHONG UNIFORMS HERE ===
                             // Values that you may want to pass to the shader are stored in light, shadingData and cameraPos.
+                        glUniform3fv(shader.getUniformLocation("lightPos"), 1, glm::value_ptr(light.position));
+                        glUniform3fv(shader.getUniformLocation("lightColor"), 1, glm::value_ptr(light.color));
+                        glUniform3fv(shader.getUniformLocation("kd"), 1, glm::value_ptr(shadingData.kd));
+                        glUniform3fv(shader.getUniformLocation("ks"), 1, glm::value_ptr(shadingData.ks));
+                        glUniform1f(shader.getUniformLocation("shininess"), shadingData.shininess);
+                        glUniform3fv(shader.getUniformLocation("viewPos"), 1, glm::value_ptr(cameraPos));
+
                         render(shader);
                     }
                 }

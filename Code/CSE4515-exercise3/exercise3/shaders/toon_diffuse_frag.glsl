@@ -1,17 +1,38 @@
 #version 410
 
-// Global variables for lighting calculations
-//uniform vec3 viewPos;
+// Input from vertex shader
+in vec3 fragPos;
+in vec3 fragNormal;
 
-// Output for on-screen color
+// Light properties
+uniform vec3 lightPos;
+uniform vec3 lightColor;
+
+// Material properties
+uniform vec3 kd; // Diffuse reflectivity
+
+// Toon shading parameters
+uniform int toonDiscretize;
+
+// Output color
 out vec4 outColor;
 
-// Interpolated output data from vertex shader
-in vec3 fragPos; // World-space position
-in vec3 fragNormal; // World-space normal
+void main() {
+    // Normalize the normal vector
+    vec3 normal = normalize(fragNormal);
 
-void main()
-{
-    // Output the normal as color
-    outColor = vec4(abs(fragNormal), 1.0);
+    // Calculate the light direction
+    vec3 lightDir = normalize(lightPos - fragPos);
+
+    // Calculate the diffuse component
+    float diff = max(dot(normal, lightDir), 0.0);
+
+    // Quantize the diffuse component
+    float quantizedDiff = floor(diff * toonDiscretize) / toonDiscretize;
+
+    // Calculate the final color
+    vec3 color = quantizedDiff * lightColor * kd;
+
+    // Set the output color
+    outColor = vec4(color, 1.0);
 }
