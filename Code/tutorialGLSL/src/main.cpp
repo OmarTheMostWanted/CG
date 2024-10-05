@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     Trackball trackball { &window, glm::radians(50.0f) };
 
     // Read Mesh
-    const Mesh mesh = loadMesh(argc == 2 ? argv[1] : RESOURCE_ROOT "resources/dragon.obj")[0];
+    const Mesh mesh = loadMesh(argc == 2 ? argv[1] : RESOURCE_ROOT "resources/DavidHeadCleanMax.obj")[0];
 
     // Read Keyboard
     window.registerKeyCallback([&](int key, int /* scancode */, int action, int /* mods */) {
@@ -70,41 +70,109 @@ int main(int argc, char** argv)
                                    .addStage(GL_FRAGMENT_SHADER, RESOURCE_ROOT "shaders/debug_frag.glsl")
                                    .build();
 
+    /*
+     * A Vertex Buffer Object (VBO) is an OpenGL feature that provides a method for uploading vertex data
+     * (such as positions, normals, colors, etc.) to the graphics card for non-immediate-mode rendering.
+     * This allows for efficient rendering of complex 3D models by storing vertex data in the GPU's memory,
+     * which can be accessed quickly during rendering.
+     */
+
+    /*
+     * In the context of OpenGL, "binding" refers to the process of making a specific buffer
+     * or object the current target for subsequent operations.
+     * When you bind a buffer, any operations you perform (such as uploading data or configuring attributes)
+     * will apply to that buffer until you bind a different buffer or unbind the current one.
+     */
+
     // Create Vertex Buffer Object and Index Buffer Objects.
     GLuint vbo;
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh.vertices.size() * sizeof(Vertex)), mesh.vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glGenBuffers(1, &vbo);  // generates one buffer object and stores its id in vbo variable.
 
-    GLuint ibo;
+    /*
+     *  GL_ARRAY_BUFFER is used to store vertex attributes (e.g., position, normal, color) and is used in the vertex shader.
+     */
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); // binds the buffer object to the target GL_ARRAY_BUFFER. Any subsequent operations will be applied to vbo buffer.
+
+    /*
+     * glBufferData is used to allocate memory for the buffer object and to copy data into it.
+     * GL_STATIC_DRAW is a hint to the driver that the data will not be changed once it is uploaded to the GPU.
+     */
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh.vertices.size() * sizeof(Vertex)), mesh.vertices.data(), GL_STATIC_DRAW); // copies the vertex data to the buffer object.
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinds the buffer object, 0 is used since we don't want to bind any buffer object to the target GL_ARRAY_BUFFER.
+
+    /*
+     * An Index Buffer Object (IBO) is an OpenGL feature that provides a method for uploading index data
+     * to the graphics card for use in indexed rendering.
+     * It indicates the order in which the vertices should be rendered to form triangles or other shapes and allows for
+     * the reuse of vertices in multiple triangles.
+     */
+
+    GLuint ibo; // Index Buffer Object
     // Create index buffer object (IBO)
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glGenBuffers(1, &ibo); // generates one buffer object and stores its id in ibo variable.
+
+    /*
+     * GL_ELEMENT_ARRAY_BUFFER is used to store the indices of the vertices that form the triangles.
+     */
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // binds the buffer object to the target GL_ELEMENT_ARRAY_BUFFER.
+    // the size in this case if the number of triangles times 3 since each triangle has 3 vertices.
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh.triangles.size() * sizeof(decltype(Mesh::triangles)::value_type)), mesh.triangles.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+
+    /*
+     * A Vertex Array Object (VAO) is an OpenGL feature that provides a method for storing the state of vertex attribute
+     * configurations and buffer objects.
+     * It  encapsulates all the state needed to specify vertex data. It stores the configuration of vertex attribute pointers and the associated buffer objects (VBOs and IBOs).
+     * By storing the configuration in a VAO, you can quickly switch between different vertex data setups without re-specifying the state.
+     */
+
     // Bind vertex data to shader inputs using their index (location).
     // These bindings are stored in the Vertex Array Object.
-    GLuint vao;
+    GLuint vao; // the VAO stores the configuration of how this data is used. This includes the vertex attribute pointers and the associated buffer objects.
     // Create VAO and bind it so subsequent creations of VBO and IBO are bound to this VAO
     glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBindVertexArray(vao);  // Used when you want to switch between different sets of vertex attribute configurations.
+    /* Rebinding the VBO and IBO after unbinding them is necessary
+     * because the VAO needs to store the state of these buffer bindings.
+     * When you bind the VAO, it captures the current state of the vertex attribute pointers
+     * and the associated buffer objects. Therefore, you need to rebind
+     * the VBO and IBO to ensure that the VAO correctly captures their state.
+     */
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind the VBO to the target GL_ARRAY_BUFFER again to set the vertex attribute pointers.
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // bind the IBO to the target GL_ELEMENT_ARRAY_BUFFER again to set the indices.
+
 
     // The position and normal vectors should be retrieved from the specified Vertex Buffer Object.
     // The stride is the distance in bytes between vertices. We use the offset to point to the normals
     // instead of the positions.
     // Tell OpenGL that we will be using vertex attributes 0 and 1.
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(0); // 0 is the location of the position attribute in the vertex shader.
+    glEnableVertexAttribArray(1); // 1 is the location of the normal attribute in the vertex shader.
+
+    /*
+     * VertexAttribArray holds the configuration of the vertex attribute pointers, unlike the buffer objects which hold the data.
+     * glVertexAttribPointer tells OpenGL how to interpret the vertex data in the VBO.
+     */
+
     // We tell OpenGL what each vertex looks like and how they are mapped to the shader by quering the driver for its location.
+
+    /*
+     * glVertexAttribPointer tells OpenGL how to interpret the vertex data in the VBO.
+     * The first parameter is the location of the vertex attribute in the shader.
+     * The second parameter is the number of components per vertex attribute (3 for position and normal).
+     * The third parameter is the data type of each component (GL_FLOAT).
+     * The fourth parameter specifies whether the data should be normalized.
+     * The fifth parameter is the stride, which is the distance in bytes between vertices.
+     * The last parameter is the offset, which is the distance in bytes from the start of the vertex to the attribute.
+     */
+
     glVertexAttribPointer(debugShader.getAttributeLocation("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glVertexAttribPointer(debugShader.getAttributeLocation("normal"), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-    glBindVertexArray(0);
+    glBindVertexArray(0); // unbind the VAO.
 
     // Enable depth testing.
     glEnable(GL_DEPTH_TEST);

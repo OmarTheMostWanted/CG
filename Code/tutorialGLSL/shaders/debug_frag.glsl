@@ -12,5 +12,5 @@ in vec3 fragNormal; // World-space normal
 
 void main() {
     // Output the normal as color
-    outColor = vec4(abs(fragNormal), 1.0);
+    outColor = vec4(abs(vec3(fragNormal.z , fragNormal.y, fragNormal.x)), 1.0);
 }
