@@ -77,7 +77,14 @@ static glm::vec3 userInteractionSphere(const glm::vec3& selectedPos, const glm::
     // RETURN the new light position, defined as follows.
     // selectedPos is a location on the mesh. Use this location to place the light source to cover the location as seen from camPos.
     // Further, the light should be at a distance of 1.5 from the origin of the scene - in other words, located on a sphere of radius 1.5 around the origin.
-    return glm::vec3(1, 1, 1);
+
+    // Calculate the direction vector from the camera to the selected position
+    glm::vec3 direction = glm::normalize(selectedPos - camPos);
+
+    // Scale the direction vector by the radius of the sphere (1.5)
+    glm::vec3 newLightPos = direction * 1.5f;
+
+    return newLightPos;
 }
 
 static glm::vec3 userInteractionShadow(const glm::vec3& selectedPos, const glm::vec3& selectedNormal, const glm::vec3& lightPos)
