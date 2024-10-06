@@ -2224,25 +2224,149 @@ Phong model is not physically possible as the light is not conserved (light is c
 
 ## Mathematical Formulation
 
-Lets say we know the reflectance function $ f_r(p, v, l) $
-What about other incoming directions?
-- integrate over hemisphere (all incoming directions)
-- note: here we assume rays, but really differential quantities
+Let's say we know the reflectance function \( f_r(p, v, l) \). But what about other incoming directions?
+- We need to integrate over the hemisphere (all incoming directions).
+- Note: Here we assume rays, but really we are dealing with differential quantities.
 
-$$ L_o(p, v) = \int_{H} f_r(p, v, l) L_i(p, l) (n \cdot \theta) dl $$
+$$ L_o(p, v) = \int_{H} f_r(p, v, l) L_i(p, l) (n \cdot \theta) \, dl $$
 
 Where:
-- $ L_o(p, v) $ is the outgoing radiance
-- $ f_r(p, v, l) $ is the reflectance function
-- $ L_i(p, l) $ is the incoming radiance
-- $ n \cdot \theta $ is the cosine term of the angle between the normal and the incoming light direction
-- p is the point on the surface
-- v is the outgoing light direction
-- l is the incoming light direction
+- \( L_o(p, v) \) is the outgoing radiance.
+- \( f_r(p, v, l) \) is the reflectance function.
+- \( L_i(p, l) \) is the incoming radiance.
+- \( n \cdot \theta \) is the cosine term of the angle between the normal and the incoming light direction.
+- \( p \) is the point on the surface.
+- \( v \) is the outgoing light direction.
+- \( l \) is the incoming light direction.
 
 ### Intuition Behind the Integration
 Imagine a point on a surface illuminated by light from all directions. To determine the total light leaving this point in a specific direction, we need to consider the contribution of light from every incoming direction. The reflectance function tells us how much of the incoming light is reflected towards the outgoing direction. By integrating over the hemisphere, we sum up the contributions from all incoming directions, weighted by the cosine term to account for the angle of incidence.
 
-#Advanced Textures TODO
+### Normalization with \( \pi \)
+The integral is normalized by dividing by \( \pi \) to ensure that the total energy is conserved. This normalization factor accounts for the solid angle of the hemisphere and ensures that the radiance values are within a physically meaningful range.
 
-#
+Why \( \pi \)?
+- The integral over the hemisphere covers a solid angle of \( 2\pi \) steradians.
+- Dividing by \( \pi \) ensures that the total energy is conserved and the radiance values are normalized.
+
+### Normalized Diffuse Term:
+\[ \text{Diffuse} = \frac{1}{\pi} k_d I \max(0, n \cdot l) \]
+   - where \( k_d \) is the diffuse reflection coefficient.
+   - \( I \) is the light intensity.
+   - \( n \) is the normal vector.
+   - \( l \) is the light direction vector.
+
+### Normalized Specular Term:
+\[ \text{Specular} = \frac{1}{\pi} k_s I \cos^n(\theta) \]
+   - where \( k_s \) is the specular reflection coefficient.
+   - \( I \) is the light intensity.
+   - \( n \) is the normal vector.
+   - \( \theta \) is the angle between the reflection of the light source and the viewer.
+   - \( n \) is the shininess coefficient.
+
+Without normalization, the light will be amplified, and the object will appear brighter than it should be.
+
+## Scattering - Geometry (Zooming into the Surface)
+- **Surface roughness at micro-geometry scale**: When we zoom into a surface, we see that it is not perfectly smooth but has tiny irregularities. These irregularities affect how light interacts with the surface.
+- **Statistical modeling**: We use statistical methods to model how light is scattered due to these irregularities, both for reflection and refraction.
+- **Two types of materials**:
+  - **Dielectric (Non-metallic)**: These materials can reflect, refract, and absorb light. Examples include water, glass, and plastic.
+  - **Conductor (Metallic)**: These materials primarily reflect and absorb light but do not refract it. Examples include metals like gold, silver, and copper.
+
+## Fresnel
+The Fresnel equations describe how light is reflected and transmitted at an interface between two different media. The Fresnel term \( F(n,l) \) represents the ratio of reflected light to incident light and depends on the angle of incidence and the refractive indices of the materials.
+
+### Schlick's Approximation
+Schlick's approximation provides a simplified way to calculate the Fresnel term:
+$$ F(n,l) \approx F_0 + (1 - F_0)(1 - (n \cdot l))^5 $$
+
+Where:
+- \( F(n,l) \) is the Fresnel term.
+- \( F_0 \) is the reflectance at normal incidence (when the light hits the surface perpendicularly).
+- \( n \) is the normal vector (perpendicular to the surface).
+- \( l \) is the light direction vector.
+
+### Specular Color from Index of Refraction (IOR)
+The reflectance at normal incidence \( F_0 \) can be calculated using the refractive indices of the two media:
+$$ F_0 = \left( \frac{n_1 - n_2}{n_1 + n_2} \right)^2 $$
+
+Where:
+- \( n_1 \) is the refractive index of the first medium.
+- \( n_2 \) is the refractive index of the second medium.
+
+### Table of IOR Values for Different Materials
+#### Metal Table
+| Material | $ f_0 $ in sRGB | Hex | Color |
+|----------|-----------------|-----|-------|
+| Silver   | 0.97, 0.96, 0.91 | #F7F6E8 | !Silver |
+| Aluminum | 0.91, 0.92, 0.92 | #E9EBEB | !Aluminum |
+| Titanium | 0.54, 0.57, 0.58 | #8A9294 | !Titanium |
+| Iron     | 0.56, 0.57, 0.58 | #8F9294 | !Iron |
+| Platinum | 0.67, 0.61, 0.58 | #AB9D94 | !Platinum |
+| Gold     | 1.00, 0.71, 0.29 | #FFB548 | !Gold |
+| Brass    | 0.71, 0.65, 0.26 | #B5A73A | !Brass |
+| Copper   | 0.95, 0.64, 0.54 | #F3A47A | !Copper |
+
+#### Dielectric Table
+| Material | Refractance | IOR | 
+|----------|------------|-----|
+| Water    | 2%        | 1.33 |
+| Fabrics  | 4% to 5.6% | 1.5 to 1.62 |
+| Common Liquids | 2% to 4% | 1.33 to 1.5 |
+| Plastic, Glass | 4% to 5% | 1.5 to 1.58 |
+| Eyes     | 2.5%  | 1.38 |
+
+In this table, "Refractance" refers to the amount of light that is refracted (bent) and not reflected. The IOR (Index of Refraction) is used to calculate \( F_0 \) for dielectric materials.
+
+## Microfacet Model (Modeling Micro-Geometry Statistically)
+The microfacet model uses statistical methods to represent the small-scale surface roughness and its effect on light scattering.
+
+- **Normal Distribution Function (NDF)**: Describes the distribution of microfacet orientations.
+- **Masking**: Parts of the surface block the view of other parts.
+- **Shadowing**: Parts of the surface cast a shadow on other parts.
+- **Inter-reflection**: Light bounces between different parts of the surface.
+
+## Visibility
+### Masking
+Masking occurs when one part of the surface blocks the view of another part.
+$$ G_1(m , v) $$
+
+Where:
+- \( G_1(m , v) \) is the masking function.
+- \( m \) is the normal vector.
+- \( v \) is the visibility vector.
+
+### Shadowing
+Shadowing occurs when one part of the surface casts a shadow on another part.
+$$ G_1(m , l) $$
+
+Where:
+- \( m \) is the normal vector.
+- \( l \) is the light direction vector.
+
+### Combining Both: Masking-Shadowing Function
+$$ G_2(m , l, v) $$
+
+Where:
+- \( G_2(m , l, v) \) combines the effects of masking and shadowing.
+
+## Putting Everything Together
+To model the interaction of light with a rough surface, we combine the Fresnel term, the Normal Distribution Function (NDF), and the visibility function.
+
+## Microfacets - Specular Reflection
+Each microfacet acts as a tiny mirror, reflecting light according to the Fresnel equations.
+
+$$ f_r(l ,v) = \frac{(F(h, l) G_2(l, v, h) D(h))}{4 \abs{n \cdot l} \abs{n \cdot v}} $$
+
+Where:
+- \( f_r(l ,v) \) is the specular reflection.
+- \( F(h, l) \) is the Fresnel term.
+- \( G_2(l, v, h) \) is the masking-shadowing function.
+- \( D(h) \) is the normal distribution function.
+- \( 4 \abs{n \cdot l} \abs{n \cdot v} \) is the normalization factor.
+
+## Roughness Parameter
+The roughness parameter \( \alpha \) controls the spread of the microfacets. A higher \( \alpha \) value indicates a rougher surface, leading to more diffuse reflection, while a lower \( \alpha \) value indicates a smoother surface, leading to more specular reflection.
+
+
+# Advanced Textures
