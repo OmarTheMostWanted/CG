@@ -2242,3 +2242,7 @@ Where:
 
 ### Intuition Behind the Integration
 Imagine a point on a surface illuminated by light from all directions. To determine the total light leaving this point in a specific direction, we need to consider the contribution of light from every incoming direction. The reflectance function tells us how much of the incoming light is reflected towards the outgoing direction. By integrating over the hemisphere, we sum up the contributions from all incoming directions, weighted by the cosine term to account for the angle of incidence.
+
+#Advanced Textures TODO
+
+#
