@@ -2370,3 +2370,109 @@ The roughness parameter \( \alpha \) controls the spread of the microfacets. A h
 
 
 # Advanced Textures
+Map properties like color, roughness, or transparency to the surface of an object.
+- Specify texture coordinates at each vertex
+- Vertex texture coordinates are interpolated over the triangle
+
+## How to define Texture Coordinates?
+### Mesh Unwrapping
+Unwrap the 3D model to a 2D plane using special software and draw the texture on the 2D plane. (Can be drawn directly on the 3D model after unwrapping)
+
+### In Between Suerfaces
+Map the texture on an object that is easily discribable and then associate that object with the actual mesh.
+
+For example define the texture on a sphere/cilender and then map the texture to the mesh.
+
+With a sphere texture, at the poles the texture will be stretched and at the equator it will be compressed.
+
+#### Cube Map
+Map the texture to a cube and then map the cube to the mesh. This solves the problem of stretching and compression.
+
+### Use Screen Space
+Use the screen space to map the texture to the mesh. This leads to differenct textures for different views.
+
+### What happens outside the texture?
+We can use differnt modes per axes
+- Border: Use a constant color
+- Clamp: Use the color of the nearest pixel
+- Repeat: Repeat the texture at the border
+
+## Alpha Blending
+Alpha blending is a technique used to combine the colors of two objects with transparency.
+Stack textred polygons and blend the colors based on the alpha value. Create trees with leaves that have transparency.
+
+## Sprites
+Sprites are 2D images that are rendered in a 3D scene. 
+
+## Water Particals
+Similuate water particiale as a quad with water texture
+
+## Affine Texture Mapping
+Interpolate texture in screen-space.
+Cheaper than perspective texture mapping.
+   -  No Z-value needed
+   -  No division needed by Z
+
+
+## Aliasing
+Aliasing is the jagged or stair-stepped appearance of in objects.
+This comes from the fact that the screen is made of pixels and the object is not aligned with the pixels. (Not one-to-one pixel mapping with tecture and screen)
+
+If the surface is far away many of the texture pixels will be mapped to the same screen pixel.
+if the surface is close, many screen pixels will be mapped to the same texture pixel.
+
+### Oversampling
+This comes from the texcels bing too big for the screen pixels. This leads to the same texcel being used for multiple screen pixels. (The texture doesn't have enough resolution)
+(Pixels smaller than texcel)
+
+#### Nearest Neighbor
+The color of the nearest texel is used for the screen pixel. (Causes blocky artifacts)
+
+
+#### Linear Interpolation
+$$ \alpha * C_1 + (1 - \alpha) * C_2 $$
+
+#### Biliniear Interpolation
+Interpolate between the 4 nearest texels to get the color of the pixel.
+Start by interpolating in the x-direction and then in the y-direction.
+##### Example
+For texcels $ (x_1 , y_1) $, $ (x_2 , y_1) $, $ (x_1 , y_2) $, $ (x_2 , y_2) $ and screen pixel $ (x, y) $:
+
+Create rectangles with the texcels and the screen pixel.
+This gives 4 rectangles with the screen pixel in the middle.
+Use the raltive size of those rectangles to interpolate the color of the screen pixel. (use the relative size as the weight)
+
+Inorder to get the color of the screen pixel, interpolate the color of the 4 texcels by applying the linear interpolation formula once in the x-direction and once in the y-direction then combine the results.
+
+### Undersampling
+This comes from the texcels being too small for the screen pixels. This leads to the same screen pixel being mapped to multiple texels. (The texture has too much resolution)
+This leads to random colors for the screen pixel. (noise)
+
+Naive solution is to average the colors of the texels. (Causes blurring) or Render at a higher resolution and then downsample (Expensive)
+
+### Mipmapping
+Computue a filtered texture beforehand for each level.
+Stating with level 0 (original texture) and then half the resolution for each level by combining each 2x2 texels into one texel. 
+Choose the correct level based on the distance to the camera.
+
+How to choose the correct level?
+In Texture space, find the region that the screen pixel is in, approxiamte a square of size $ 2^k $ and then choose the level $ k $.
+
+The extra memeory usage is one third of the original texture.
+
+$$ MemoeryCostAllLevels = \sum_{i=0}^{n} \left( \frac{1}{4^i} \right) = \frac{4}{3} * \left( 1 - \frac{1}{4^{n+1}} \right) $$
+In the limit the cost is $ \frac{4}{3} $ ie one third more of the original texture.
+
+This approach of using the nearest level causes discontinuities at the borders of the levels since mipmans only grow by a factor of 2.
+
+
+### Interpolation between Mipmaps (Trilinear Filtering)
+Interpolate between the two nearest levels of the mipmaps.
+
+### Anisotropic Filtering
+In Mipmapping, the texels are combined in a square. This leads to blurring in when the z direction is strecthed differently than the x and y directions. But we approxiamte the pixel mapping as a square.
+
+
+Inspread of at each mipmap level to reduce both x and y by 2, at each level create two levels one with x reduced by 2 and the other with y reduced by 2. This leads to a rectangular texel at each level.
+
+This leads to a better approximation of the pixel mapping but costs 4 times more memory than the original texture.
