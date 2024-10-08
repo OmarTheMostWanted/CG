@@ -681,7 +681,6 @@ int main(int argc, char** argv)
             glBindVertexArray(vao);
             glDrawArrays(GL_POINTS, 0, 1);
             glBindVertexArray(0);
-
         }
         //glDepthMask(GL_TRUE);
 
