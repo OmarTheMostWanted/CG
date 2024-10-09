@@ -1,7 +1,6 @@
 #version 410 core
 
 // Global variables for lighting calculations.
-//uniform vec3 viewPos;
 uniform sampler2D texShadow;
 
 // scene uniforms
@@ -13,6 +12,7 @@ uniform int samplingMode = 0;
 uniform int peelingMode = 0;
 uniform int lightMode = 0;
 uniform int lightColorMode = 0;
+uniform float shadowMapResolution; // Add this uniform
 
 // Output for on-screen color.
 out vec4 outColor;
@@ -23,6 +23,7 @@ in vec3 fragNormal; // World-space normal
 
 void main()
 {
+    float bias = 0.005;
     vec4 fragLightCoord = lightMVP * vec4(fragPos, 1.0);
 
     // perspective division
@@ -32,32 +33,36 @@ void main()
     //  we transform them to texture space (0 to 1).
     fragLightCoord.xyz = fragLightCoord.xyz * 0.5 + 0.5;
 
-    // Depth of the fragment with respect to the light
-    float fragLightDepth = fragLightCoord.z;
+    // Perform shadow test
+    float shadow = 0.0;
+    if (samplingMode == 1) {
+        // PCF kernel size
+        float kernelSize = 1.0 / shadowMapResolution; // Use the uniform
+        int samples = 4; // Number of samples per axis
+        float totalSamples = float((samples * 2 + 1) * (samples * 2 + 1));
 
-    // Shadow map coordinate corresponding to this fragment
-    vec2 shadowMapCoord = fragLightCoord.xy;
-
-    // Shadow map value from the corresponding shadow map position
-    float shadowMapDepth = texture(texShadow, shadowMapCoord).x;
+        for (int x = -samples; x <= samples; ++x) {
+            for (int y = -samples; y <= samples; ++y) {
+                vec2 offset = vec2(float(x), float(y)) * kernelSize;
+                float depth = texture(texShadow, fragLightCoord.xy + offset).r;
+                shadow += (fragLightCoord.z - bias) > depth ? 1.0 : 0.0;
+            }
+        }
+        shadow /= totalSamples;
+    } else {
+        float depth = texture(texShadow, fragLightCoord.xy).r;
+        shadow = (fragLightCoord.z - bias) > depth ? 1.0 : 0.0;
+    }
 
     // Output the normal as color.
     vec3 lightDir = normalize(lightPos - fragPos);
-
     vec3 normal = fragNormal;
 
-    if (lightMode == 0)
-    {
-        float bias = 0.005f;
-        //compare the depth of the fragment with the depth stored in the shadow map
-        if (fragLightDepth - bias > shadowMapDepth)
-        {
-            outColor = vec4(0.0, 0.0, 0.0, 1.0);
-
-        } else {
-            outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0);
-        }
-
+    if (lightMode == 0) {
+        float diff = max(dot(normal, lightDir), 0.0);
+        vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+        outColor = vec4(diffuse * (1.0 - shadow), 1.0);
+    } else {
+        // Other lighting modes
     }
-//    outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0);
 }

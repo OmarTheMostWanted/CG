@@ -153,11 +153,10 @@ int main()
 
     // === Create Shadow Texture ===>
     GLuint texShadow;
-    const int SHADOWTEX_WIDTH = 400;
-    const int SHADOWTEX_HEIGHT = 400;
+    const int SHADOWTEX_RES = 1000;
     glGenTextures(1, &texShadow); // Generate a texture object.
     glBindTexture(GL_TEXTURE_2D, texShadow); // Bind the texture object.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL); // Create the texture.
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SHADOWTEX_RES, SHADOWTEX_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL); // Create the texture.
     // Set behaviour for when texture coordinates are outside the [0, 1] range.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -200,7 +199,7 @@ int main()
             shadowShader.bind();
 
             // Set viewport size
-            glViewport(0, 0, SHADOWTEX_WIDTH, SHADOWTEX_HEIGHT);
+            glViewport(0, 0, SHADOWTEX_RES, SHADOWTEX_RES);
 
             // .... HERE YOU MUST ADD THE CORRECT UNIFORMS FOR RENDERING THE SHADOW MAP
             // pass samplingmode as uniform
@@ -233,7 +232,7 @@ int main()
         glUniform1i(mainShader.getUniformLocation("peelingMode"), peelingMode);
         glUniform1i(mainShader.getUniformLocation("lightMode"), lightMode);
         glUniform1i(mainShader.getUniformLocation("lightColorMode"), lightColorMode);
-
+        glUniform1f(mainShader.getUniformLocation("shadowMapResolution"), static_cast<float>(SHADOWTEX_RES));
 
         // Bind vertex data
         glBindVertexArray(vao);
