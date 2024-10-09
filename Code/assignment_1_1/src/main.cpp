@@ -349,6 +349,10 @@ void readLights() {
     }
 }
 
+GLuint depthMapFBO;
+GLuint depthMap;
+const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+bool useShadows = true;
 
 // Program entry point. Everything starts here.
 int main(int argc, char **argv) {
@@ -599,9 +603,34 @@ int main(int argc, char **argv) {
 
     const Shader distanceShader = ShaderBuilder().addStage(GL_VERTEX_SHADER, RESOURCE_ROOT "shaders/vertex.glsl").addStage(GL_FRAGMENT_SHADER, RESOURCE_ROOT "shaders/distance_frag.glsl").build();
 
+    const Shader depthShader = ShaderBuilder()
+            .addStage(GL_VERTEX_SHADER, RESOURCE_ROOT "shaders/depth_vertex.glsl")
+            .addStage(GL_FRAGMENT_SHADER, RESOURCE_ROOT "shaders/depth_frag.glsl")
+            .build();
+
+    // Create framebuffer object
+    glGenFramebuffers(1, &depthMapFBO);
+
+// Create depth texture
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+// Attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // Create Vertex Buffer Object and Index Buffer Objects.
     GLuint vbo;
-
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(mesh.vertices.size() * sizeof(Vertex)), mesh.vertices.data(), GL_STATIC_DRAW);
@@ -662,6 +691,29 @@ int main(int argc, char **argv) {
     while (!window.shouldClose()) {
         window.updateInput();
         imgui();
+
+        if (useShadows) {
+            // 1. Render depth map
+            glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+            glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+            glClear(GL_DEPTH_BUFFER_BIT);
+
+            glm::mat4 lightProjection, lightView;
+            glm::mat4 lightSpaceMatrix;
+            float near_plane = 1.0f, far_plane = 7.5f;
+            lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+            lightView = glm::lookAt(lights[selectedLightIndex].position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+            lightSpaceMatrix = lightProjection * lightView;
+
+            depthShader.bind();
+            glUniformMatrix4fv(depthShader.getUniformLocation("mvp"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+            glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.triangles.size()) * 3, GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(0);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
 
         // Clear the framebuffer to black and depth to maximum value (ranges from [-1.0 to +1.0]).
         glViewport(0, 0, window.getWindowSize().x, window.getWindowSize().y);
