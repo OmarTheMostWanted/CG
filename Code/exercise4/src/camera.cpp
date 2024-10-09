@@ -1,5 +1,6 @@
 #include "camera.h"
 // Suppress warnings in third-party code.
+#include <iostream>
 #include <framework/disable_all_warnings.h>
 DISABLE_WARNINGS_PUSH()
 #include <GLFW/glfw3.h>
@@ -12,10 +13,11 @@ Camera::Camera(Window* pWindow)
 {
 }
 
-Camera::Camera(Window* pWindow, const glm::vec3& pos, const glm::vec3& forward)
+Camera::Camera(Window* pWindow, const glm::vec3& pos, const glm::vec3& forward , std::string name)
     : m_position(pos)
     , m_forward(glm::normalize(forward))
     , m_pWindow(pWindow)
+    , m_name(name)
 {
 }
 
@@ -54,6 +56,10 @@ void Camera::updateInput()
 {
     constexpr float moveSpeed = 0.05f;
     constexpr float lookSpeed = 0.0035f;
+
+    if (!m_userInteraction) return;
+
+
 
     if (m_userInteraction) {
         glm::vec3 localMoveDelta { 0 };
