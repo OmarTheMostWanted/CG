@@ -33,11 +33,9 @@ void main()
     //  we transform them to texture space (0 to 1).
     fragLightCoord.xyz = fragLightCoord.xyz * 0.5 + 0.5;
 
-    auto middle_point = texture(texShadow , 0.5 , 0.5); //create a circle arround this point with r =1
+//    float middle_point = texture(texShadow , 0.5 , 0.5); //create a circle arround this point with r =1
     // if coord is larger than distance to middle then light 0
     // if the distance is less than 1, then its d * light
-
-
 
     // Perform shadow test
     float shadow = 0.0;

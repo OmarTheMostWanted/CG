@@ -19,8 +19,10 @@ DISABLE_WARNINGS_POP()
 #include "imgui/imgui.h"
 
 // Configuration
-constexpr int WIDTH = 800;
-constexpr int HEIGHT = 600;
+constexpr int WIDTH = 1000;
+constexpr int HEIGHT = 1000;
+int SHADOWTEX_RES = 1000;
+bool cameraControl = true;
 
 
 bool show_imgui = true;
@@ -43,9 +45,18 @@ void imgui()
     if (!show_imgui)
         return;
 
+
+
+
     ImGui::Begin("Practical 4: Shadow Mapping");
     ImGui::Text("Press \\ to show/hide this menu");
     ImGui::Separator();
+
+    //slider for shadow res from 0 to 5000
+    //ImGui::SliderInt("Shadow Resolution", &SHADOWTEX_RES, 0, 5000);
+
+    ImGui::Separator();
+
     ImGui::Combo("Sampling Mode", &samplingMode, samplingModes.data(), (int)samplingModes.size());
     ImGui::Combo("Depth Peeling", &peelingMode, peelingModes.data(), (int)peelingModes.size());
     ImGui::Combo("Spotlight", &lightMode, lightTypeModes.data(), (int)lightTypeModes.size());
@@ -66,9 +77,17 @@ int main()
     mainCamera.setUserInteraction(true);
     lightCamera.setUserInteraction(false);
 
-    constexpr float fov = glm::pi<float>() / 4.0f;
-    constexpr float aspect = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
-    const glm::mat4 mainProjectionMatrix = glm::perspective(fov, aspect, 0.1f, 30.0f);
+    constexpr float mainFov = glm::pi<float>() / 4.0f;
+    constexpr float mainAspect = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
+    const glm::mat4 mainProjectionMatrix = glm::perspective(mainFov, mainAspect, 0.1f, 30.0f);
+
+    // Define the light projection matrix
+    // const float orthoSize = glm::pi<float>() / 5.0f;
+    // const glm::mat4 lightProjectionMatrix = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 30.0f);
+
+    constexpr float lightFov = glm::pi<float>() / 4.0f;
+    constexpr float lightAspect = 1.0f;
+    const glm::mat4 lightProjectionMatrix = glm::perspective(lightFov, lightAspect, 0.1f, 30.0f);
 
     // === Modify for exercise 1 ===
     // Key handle function
@@ -92,6 +111,18 @@ int main()
                 lightCamera.setUserInteraction(true);
                 mainCamera.setUserInteraction(false);
                 break;
+            case GLFW_KEY_3:
+                if (cameraControl)
+                {
+                    activeCamera->setUserInteraction(false);
+                    cameraControl = false;
+                } else
+                {
+                    activeCamera->setUserInteraction(true);
+                    cameraControl = true;
+                }
+                break;
+
             default:
                 break;
             }
@@ -153,7 +184,6 @@ int main()
 
     // === Create Shadow Texture ===>
     GLuint texShadow;
-    const int SHADOWTEX_RES = 1000;
     glGenTextures(1, &texShadow); // Generate a texture object.
     glBindTexture(GL_TEXTURE_2D, texShadow); // Bind the texture object.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, SHADOWTEX_RES, SHADOWTEX_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL); // Create the texture.
@@ -182,7 +212,7 @@ int main()
         imgui();
 
         activeCamera->updateInput();
-        const glm::mat4 lightMvp = mainProjectionMatrix * lightCamera.viewMatrix(); // Assume model matrix is identity.
+        const glm::mat4 lightMvp = lightProjectionMatrix * lightCamera.viewMatrix(); // Assume model matrix is identity.
 
 
         // === Stub code for you to fill in order to render the shadow map ===
