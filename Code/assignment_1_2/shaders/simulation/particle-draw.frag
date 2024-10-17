@@ -11,6 +11,9 @@ uniform bool useShading;
 uniform float ambientCoefficient;
 uniform float diffuseCoefficient;
 
+uniform bool useBlinkColor;
+uniform vec3 blinkColor;
+
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec3 fragNormal;
 layout(location = 2) in vec3 fragVelocity;
@@ -22,15 +25,18 @@ void main() {
     vec3 baseColor = vec3(1.0);
 
     // ===== Task 2.1 Speed-based Colors =====
-
     if (useSpeedBasedColor) {
         float speed = length(fragVelocity);
         float t = clamp(speed / maxSpeed, 0.0, 1.0);
         baseColor = mix(colorAtZeroSpeed, colorAtMaxSpeed, t);
     }
 
-
     vec3 finalColor = baseColor;
+
+    // ===== Task 2.3 Blinking =====
+    if (useBlinkColor && fragBounceData.y > 0.0) {
+        finalColor = blinkColor;
+    }
 
     // ===== Task 2.2 Shading =====
     if (useShading) {
@@ -39,6 +45,7 @@ void main() {
 
         finalColor = ambientCoefficient * baseColor + diffuseCoefficient * diffuse * baseColor;
     }
+
 
     fragColor = vec4(finalColor, 1.0);
 }

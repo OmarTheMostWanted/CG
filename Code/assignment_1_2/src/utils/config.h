@@ -35,4 +35,10 @@ struct Config {
     float ambientCoefficient = 0.1f;
     float diffuseCoefficient = 0.9f;
 
+    // Blinking parameters
+    bool useBlinkColor = false;
+    glm::vec3 blinkColor = glm::vec3(1.0f, 0.0f, 0.0f); // Red
+    int collisionThreshold = 3;
+    int blinkDuration = 10;
+
 };

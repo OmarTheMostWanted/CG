@@ -11,6 +11,10 @@ uniform vec3 containerCenter;
 uniform float containerRadius;
 uniform bool interParticleCollision;
 
+uniform int collisionThreshold;
+uniform int blinkDuration;
+
+
 layout(location = 0) out vec3 finalPosition;
 layout(location = 1) out vec3 finalVelocity;
 layout(location = 2) out vec3 finalBounceData;
@@ -23,6 +27,7 @@ void main() {
     // Sample the previous position and velocity
     vec3 previousPosition = texelFetch(previousPositions, ivec2(particleIndex, 0), 0).rgb;
     vec3 previousVelocity = texelFetch(previousVelocities, ivec2(particleIndex, 0), 0).rgb;
+    vec3 previousBounceData = texelFetch(previousBounceData, ivec2(particleIndex, 0), 0).rgb;
 
     // Define the acceleration due to gravity
     vec3 acceleration = vec3(0.0, -9.81, 0.0);
@@ -38,7 +43,7 @@ void main() {
     finalVelocity = newVelocity;
 
     // For now, pass through the previous bounce data
-    finalBounceData = texelFetch(previousBounceData, ivec2(particleIndex, 0), 0).rgb;
+    finalBounceData = previousBounceData;
 
     // ===== Task 1.3 Inter-particle Collision =====
     if (interParticleCollision) {
@@ -62,6 +67,9 @@ void main() {
 
                 // Reflect the velocity about the normal
                 newVelocity = reflect(newVelocity, normal);
+
+                // Increment collision counter
+                previousBounceData.x += 1.0;
             }
         }
     }
@@ -81,6 +89,19 @@ void main() {
 
         // Reflect the velocity about the normal
         newVelocity = reflect(newVelocity, normal);
+
+        // Increment collision counter
+        previousBounceData.x += 1.0;
+    }
+
+    // Handle blinking
+    if (previousBounceData.x >= float(collisionThreshold)) {
+        previousBounceData.x = 0.0;
+        previousBounceData.y = float(blinkDuration);
+    }
+
+    if (previousBounceData.y > 0.0) {
+        previousBounceData.y -= 1.0;
     }
 
     // Output the new position and velocity
@@ -88,5 +109,7 @@ void main() {
     finalVelocity = newVelocity;
 
     // For now, pass through the previous bounce data
-    finalBounceData = texelFetch(previousBounceData, ivec2(particleIndex, 0), 0).rgb;
+//    finalBounceData = texelFetch(previousBounceData, ivec2(particleIndex, 0), 0).rgb;
+    finalBounceData = previousBounceData;
+
 }

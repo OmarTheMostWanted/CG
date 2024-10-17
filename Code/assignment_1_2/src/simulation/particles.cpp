@@ -161,6 +161,11 @@ void ParticlesSimulator::simulate() {
     glUniform1f(simulationPass.getUniformLocation("containerRadius"), config.sphereRadius);
     glUniform1i(simulationPass.getUniformLocation("interParticleCollision"), config.particleInterCollision);
 
+    // New uniforms for blinking
+    glUniform1i(simulationPass.getUniformLocation("collisionThreshold"), config.collisionThreshold);
+    glUniform1i(simulationPass.getUniformLocation("blinkDuration"), config.blinkDuration);
+
+
     // Render fullscreen quad to 'touch' all texels
     utils::renderQuad(simulationPass);
 }

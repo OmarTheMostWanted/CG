@@ -70,5 +70,10 @@ void Menu::drawParticleColorControls() {
     ImGui::Checkbox("Use shading", &m_config.useShading);
     ImGui::SliderFloat("Ambient coefficient", &m_config.ambientCoefficient, 0.0f, 1.0f, "%.2f");
     ImGui::SliderFloat("Diffuse coefficient", &m_config.diffuseCoefficient, 0.0f, 1.0f, "%.2f");
+
+    ImGui::Checkbox("Use blink color", &m_config.useBlinkColor);
+    ImGui::ColorEdit3("Blink color", glm::value_ptr(m_config.blinkColor));
+    ImGui::SliderInt("Collision threshold", &m_config.collisionThreshold, 1, 10);
+    ImGui::SliderInt("Blink duration", &m_config.blinkDuration, 1, 100);
 }
 
