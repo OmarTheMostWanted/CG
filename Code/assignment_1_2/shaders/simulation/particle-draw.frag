@@ -31,12 +31,14 @@ void main() {
         baseColor = mix(colorAtZeroSpeed, colorAtMaxSpeed, t);
     }
 
-    vec3 finalColor = baseColor;
 
     // ===== Task 2.3 Blinking =====
     if (useBlinkColor && fragBounceData.y > 0.0) {
-        finalColor = blinkColor;
+        baseColor = blinkColor;
     }
+
+    vec3 finalColor = baseColor;
+
 
     // ===== Task 2.2 Shading =====
     if (useShading) {

@@ -208,6 +208,10 @@ void ParticlesSimulator::draw(const glm::mat4& viewProjection) {
     glUniform1f(drawPass.getUniformLocation("ambientCoefficient"), config.ambientCoefficient);
     glUniform1f(drawPass.getUniformLocation("diffuseCoefficient"), config.diffuseCoefficient);
 
+    // Pass blinking parameters to the shader
+    glUniform1i(drawPass.getUniformLocation("useBlinkColor"), config.useBlinkColor);
+    glUniform3fv(drawPass.getUniformLocation("blinkColor"), 1, glm::value_ptr(config.blinkColor));
+
     // Render number of instances equal to number of particles
     particleModel.drawInstanced(config.numParticles);
 }
