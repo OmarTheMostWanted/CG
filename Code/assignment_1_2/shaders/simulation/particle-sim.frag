@@ -45,5 +45,26 @@ void main() {
     }
     
     // ===== Task 1.2 Container Collision =====
+    // Calculate the distance from the particle to the center of the container
+    vec3 toCenter = newPosition - containerCenter;
+    float distanceToCenter = length(toCenter);
 
+    // Check if the particle is outside the container
+    if (distanceToCenter + particleRadius > containerRadius) {
+        // Calculate the normal at the point of collision
+        vec3 normal = normalize(toCenter);
+
+        // Adjust the position to push the particle back inside the container
+        newPosition = containerCenter + normal * (containerRadius - particleRadius * 1.01);
+
+        // Reflect the velocity about the normal
+        newVelocity = reflect(newVelocity, normal);
+    }
+
+    // Output the new position and velocity
+    finalPosition = newPosition;
+    finalVelocity = newVelocity;
+
+    // For now, pass through the previous bounce data
+    finalBounceData = texelFetch(previousBounceData, ivec2(particleIndex, 0), 0).rgb;
 }
