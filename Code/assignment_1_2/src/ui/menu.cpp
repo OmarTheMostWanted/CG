@@ -66,5 +66,9 @@ void Menu::drawParticleColorControls() {
     ImGui::ColorEdit3("Color at zero speed", glm::value_ptr(m_config.colorAtZeroSpeed));
     ImGui::ColorEdit3("Color at max speed", glm::value_ptr(m_config.colorAtMaxSpeed));
     ImGui::SliderFloat("Max speed", &m_config.maxSpeed, 0.1f, 100.0f, "%.1f");
+
+    ImGui::Checkbox("Use shading", &m_config.useShading);
+    ImGui::SliderFloat("Ambient coefficient", &m_config.ambientCoefficient, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat("Diffuse coefficient", &m_config.diffuseCoefficient, 0.0f, 1.0f, "%.2f");
 }
 

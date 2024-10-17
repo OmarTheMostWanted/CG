@@ -25,9 +25,14 @@ struct Config {
 
     // ===== Part 2: Drawing =====
     // Part 2: Drawing
-    bool useSpeedBasedColor         = false;
+    bool useSpeedBasedColor          = false;
     glm::vec3 colorAtZeroSpeed      = glm::vec3(0.0f, 0.0f, 1.0f); // Blue
     glm::vec3 colorAtMaxSpeed       = glm::vec3(1.0f, 0.0f, 0.0f); // Red
-    float maxSpeed                  = 10.0f;
+    float maxSpeed                            = 10.0f;
+
+    // Shading parameters
+    bool useShading = false;
+    float ambientCoefficient = 0.1f;
+    float diffuseCoefficient = 0.9f;
 
 };
