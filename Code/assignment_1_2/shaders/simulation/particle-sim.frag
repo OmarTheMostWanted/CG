@@ -42,6 +42,28 @@ void main() {
 
     // ===== Task 1.3 Inter-particle Collision =====
     if (interParticleCollision) {
+        for (uint i = 0; i < numParticles; ++i) {
+            if (i == particleIndex) continue; // Skip self-collision check
+
+            // Sample the position of the other particle
+            vec3 otherPosition = texelFetch(previousPositions, ivec2(i, 0), 0).rgb;
+
+            // Calculate the distance to the other particle
+            vec3 toOther = newPosition - otherPosition;
+            float distanceToOther = length(toOther);
+
+            // Check if a collision has occurred
+            if (distanceToOther < 2.0 * particleRadius) {
+                // Calculate the normal at the point of collision
+                vec3 normal = normalize(toOther);
+
+                // Adjust the position to push the particle away from the other particle
+                newPosition = otherPosition + normal * (2.0 * particleRadius * 1.01);
+
+                // Reflect the velocity about the normal
+                newVelocity = reflect(newVelocity, normal);
+            }
+        }
     }
     
     // ===== Task 1.2 Container Collision =====
