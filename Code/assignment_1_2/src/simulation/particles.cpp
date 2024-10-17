@@ -192,6 +192,12 @@ void ParticlesSimulator::draw(const glm::mat4& viewProjection) {
     glUniform3fv(drawPass.getUniformLocation("containerCenter"), 1, glm::value_ptr(config.sphereCenter));
     // ===== Part 2: Drawing =====
 
+    // Pass new variables to the shader
+    glUniform1i(drawPass.getUniformLocation("useSpeedBasedColor"), config.useSpeedBasedColor);
+    glUniform3fv(drawPass.getUniformLocation("colorAtZeroSpeed"), 1, glm::value_ptr(config.colorAtZeroSpeed));
+    glUniform3fv(drawPass.getUniformLocation("colorAtMaxSpeed"), 1, glm::value_ptr(config.colorAtMaxSpeed));
+    glUniform1f(drawPass.getUniformLocation("maxSpeed"), config.maxSpeed);
+
     // Render number of instances equal to number of particles
     particleModel.drawInstanced(config.numParticles);
 }

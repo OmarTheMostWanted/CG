@@ -2,6 +2,11 @@
 
 uniform vec3 containerCenter;
 
+uniform bool useSpeedBasedColor;
+uniform vec3 colorAtZeroSpeed;
+uniform vec3 colorAtMaxSpeed;
+uniform float maxSpeed;
+
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec3 fragNormal;
 layout(location = 2) in vec3 fragVelocity;
@@ -13,6 +18,13 @@ void main() {
     vec3 baseColor = vec3(1.0);
 
     // ===== Task 2.1 Speed-based Colors =====
+
+    if (useSpeedBasedColor) {
+        float speed = length(fragVelocity);
+        float t = clamp(speed / maxSpeed, 0.0, 1.0);
+        baseColor = mix(colorAtZeroSpeed, colorAtMaxSpeed, t);
+    }
+
 
     vec3 finalColor = baseColor;
 
