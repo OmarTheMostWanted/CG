@@ -45,6 +45,7 @@ uniform float rasterize_width;
 
 void main()
 {
+
     // ---- CIRCLE
     if (shape_type == 0) {
         vec2 pixel_center = gl_FragCoord.xy;
