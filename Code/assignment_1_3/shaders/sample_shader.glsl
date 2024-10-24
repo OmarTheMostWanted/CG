@@ -3,10 +3,10 @@
 #define M_PI 3.14159265359f
 
 // Output for accumulated color
-layout(location = 0) out vec4 outColor;
+layout (location = 0) out vec4 outColor;
 
 //Set gl_FragCoord to pixel center
-layout(pixel_center_integer) in vec4 gl_FragCoord;
+layout (pixel_center_integer) in vec4 gl_FragCoord;
 
 
 //Circle and line struct equivalent to the one in shape.h
@@ -25,13 +25,13 @@ struct Line {
 
 //The uniform buffers for the shapes containing the count of shapes in the first slot and after that, the actual shapes
 //We need to give the arrays a fixed size to work with opengl 4.1
-layout(std140) uniform circleBuffer
+layout (std140) uniform circleBuffer
 {
     int circle_count;
     Circle circles[32];
 };
 
-layout(std140) uniform lineBuffer
+layout (std140) uniform lineBuffer
 {
     int line_count;
     Line lines[800];
@@ -67,7 +67,7 @@ float get_random_numbers(inout uint seed) {
     seed ^= (seed >> 16u);
     return seed * pow(0.5, 32.0);
 }
-vec2 march_ray(vec2 origin, vec2 direction, float step_size) {
+vec2 march_ray_circle(vec2 origin, vec2 direction, float step_size) {
     vec2 current_position = origin;
     for (uint i = 0; i < max_raymarch_iter; ++i) {
         ivec2 tex_coords = ivec2(current_position);
@@ -103,29 +103,36 @@ void main()
     vec2 direction = vec2(cos(angle), sin(angle));
     vec2 origin = gl_FragCoord.xy;
 
-    // March the ray and check for intersections
-    vec2 intersection = march_ray(origin, direction, step_size);
-    ivec2 tex_coords = ivec2(intersection);
+    if (shape_type == 0) {
 
-    // Fetch the circle index from the rasterized texture
-    int circle_index = texelFetch(rasterized_texture, tex_coords, 0).r;
+        // March the ray and check for intersections
+        vec2 intersection = march_ray_circle(origin, direction, step_size);
+        ivec2 tex_coords = ivec2(intersection);
 
-    // Initialize the output color
-    vec4 accumulated_color = texelFetch(accumulator_texture, ivec2(gl_FragCoord.xy), 0);
+        // Fetch the circle index from the rasterized texture
+        int circle_index = texelFetch(rasterized_texture, tex_coords, 0).r;
 
-    //If a shape is hit we can sample it
-    //    bool hit = circle_index >= 0 && circle_index < circle_count;
-    bool hit = circle_index >= 0; // this means that we fit something if true,
-    if(hit){
-        Circle circle = circles[circle_index];
-        float distance = length(gl_FragCoord.xy - circle.position);
-        // ---- Circle
-        if (shape_type == 0 && distance < circle.radius) {
-            accumulated_color += circle.color;
+        // Initialize the output color
+        vec4 accumulated_color = texelFetch(accumulator_texture, ivec2(gl_FragCoord.xy), 0);
+
+        //If a shape is hit we can sample it
+        //    bool hit = circle_index >= 0 && circle_index < circle_count;
+        bool hit = circle_index >= 0; // this means that we fit something if true,
+        if (hit) {
+            Circle circle = circles[circle_index];
+            float distance = length(gl_FragCoord.xy - circle.position);
+            // ---- Circle
+            if (shape_type == 0 && distance < circle.radius) {
+                accumulated_color += circle.color;
+            }
+            // ---- Line
+            else if (shape_type == 1) {
+            }
         }
+        outColor = accumulated_color;
+    } else if (shape_type == 1){
         // ---- Line
-        else if (shape_type == 1) {
-        }
+
     }
-    outColor = accumulated_color;
+
 }

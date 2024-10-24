@@ -66,15 +66,18 @@ void main()
             Line line = lines[i];
             vec2 line_dir = normalize(line.end_point - line.start_point);
             vec2 line_normal = vec2(-line_dir.y, line_dir.x);
-            // check if the point is within the line width
+            float line_length = length(line.end_point - line.start_point);
 
-            vec2 from_start_to_pixel = normalize(pixel_center - line.start_point);
+            float distance_to_line = abs(dot(pixel_center - line.start_point, line_normal));
+            float projection = dot(pixel_center - line.start_point, line_dir);
 
-            vec2 distance_vector = from_start_to_pixel - line_dir;
+            if (distance_to_line <= rasterize_width && projection >= 0 && projection <= line_length) {
+                shape_id = i;
+                break;
+            }
 
-            float distance  = length(distance_vector);
-
-            if (distance <= 0.01) {
+            // Check round caps at the ends
+            if (length(pixel_center - line.start_point) <= rasterize_width || length(pixel_center - line.end_point) <= rasterize_width) {
                 shape_id = i;
                 break;
             }
