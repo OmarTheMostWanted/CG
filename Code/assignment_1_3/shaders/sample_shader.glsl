@@ -58,6 +58,9 @@ uniform float step_size;
 //The maximum amount of raymarching steps we can take
 uniform uint max_raymarch_iter;
 
+// Small epsilon to avoid division by zero
+const float epsilon = 1e-5;
+
 //Random number generator outputs numbers between [0-1]
 float get_random_numbers(inout uint seed) {
     seed = 1664525u * seed + 1013904223u;
@@ -67,6 +70,7 @@ float get_random_numbers(inout uint seed) {
     seed ^= (seed >> 16u);
     return seed * pow(0.5, 32.0);
 }
+
 vec2 march_ray_circle(vec2 origin, vec2 direction, float step_size) {
     vec2 current_position = origin;
     for (uint i = 0; i < max_raymarch_iter; ++i) {
@@ -84,6 +88,24 @@ vec2 march_ray_circle(vec2 origin, vec2 direction, float step_size) {
         }
         current_position += direction * step_size;
     }
+    return current_position;
+}
+
+vec2 march_ray_line(vec2 origin, vec2 direction, out int hit_index) {
+    vec2 current_position = origin;
+    for (uint i = 0; i < max_raymarch_iter; ++i) {
+        ivec2 tex_coords = ivec2(current_position);
+        if (tex_coords.x < 0 || tex_coords.x >= screen_dimensions.x || tex_coords.y < 0 || tex_coords.y >= screen_dimensions.y) {
+            break;
+        }
+        int index = texelFetch(rasterized_texture, tex_coords, 0).r;
+        if (index >= 0) {
+            hit_index = index;
+            return current_position;
+        }
+        current_position += direction * step_size;
+    }
+    hit_index = -1;
     return current_position;
 }
 
@@ -131,7 +153,35 @@ void main()
         }
         outColor = accumulated_color;
     } else if (shape_type == 1){
-        // ---- Line
+        int hit_index;
+        vec2 intersection = march_ray_line(origin, direction, hit_index);
+
+        // Initialize the output color
+        vec4 accumulated_color = texelFetch(accumulator_texture, ivec2(gl_FragCoord.xy), 0);
+
+        if (hit_index >= 0) {
+            float distance = length(origin - intersection);
+            float weight = 1.0 / (distance + epsilon);
+
+            if (shape_type == 0 && hit_index < circle_count) {
+                Circle circle = circles[hit_index];
+                if (distance < circle.radius) {
+                    accumulated_color += circle.color * weight;
+                }
+            } else if (shape_type == 1 && hit_index < line_count) {
+                Line line = lines[hit_index];
+                vec2 line_dir = normalize(line.end_point - line.start_point);
+                vec2 line_normal = vec2(-line_dir.y, line_dir.x);
+                float projection = dot(intersection - line.start_point, line_dir);
+
+                if (projection >= 0 && projection <= length(line.end_point - line.start_point)) {
+                    vec4 color = dot(intersection - line.start_point, line_normal) < 0 ? line.color_right[0] : line.color_left[0];
+                    accumulated_color += color * weight;
+                }
+            }
+        }
+
+        outColor = accumulated_color;
 
     }
 
