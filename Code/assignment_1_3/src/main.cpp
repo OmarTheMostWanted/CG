@@ -105,7 +105,7 @@ int main() {
     glm::vec3  quad_vertices[6] = { {1,-1,0},{-1,1,0},{1,1,0}, {-1,-1,0}, {-1,1,0}, {1,-1,0} };
 
 	//Set the shape to use
-	Shape shape = Shape::Line;
+	Shape shape = Shape::Circle;
 
 	// Create vertex (vbo) and index (ibo) buffer objects and fill them with the data for the quad, this will be the only geometry we need.
 	GLuint vbo;
