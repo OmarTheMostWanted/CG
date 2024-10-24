@@ -127,7 +127,8 @@ void main()
     }
 
     // Initialize the seed for the random number generator
-    uint seed = uint(gl_FragCoord.x) * 1973u + uint(gl_FragCoord.y) * 9277u + frame_nr * 26699u;
+    uint seed = (uint(gl_FragCoord.x) * 1973u) ^ (uint(gl_FragCoord.y) * 9277u) ^ (frame_nr * 26699u);
+
 
     // Generate a random direction for the ray
     float angle = 2.0 * M_PI * get_random_numbers(seed);
