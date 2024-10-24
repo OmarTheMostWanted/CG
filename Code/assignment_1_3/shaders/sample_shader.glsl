@@ -59,7 +59,7 @@ uniform float step_size;
 uniform uint max_raymarch_iter;
 
 // Small epsilon to avoid division by zero
-const float epsilon = 1e-5;
+const float epsilon = 1e-3;
 
 //Random number generator outputs numbers between [0-1]
 float get_random_numbers(inout uint seed) {
@@ -147,12 +147,9 @@ void main()
             if (shape_type == 0 && distance < circle.radius) {
                 accumulated_color += circle.color;
             }
-            // ---- Line
-            else if (shape_type == 1) {
-            }
         }
         outColor = accumulated_color;
-    } else if (shape_type == 1){
+    } else if (shape_type == 1) {
         int hit_index;
         vec2 intersection = march_ray_line(origin, direction, hit_index);
 
@@ -163,26 +160,18 @@ void main()
             float distance = length(origin - intersection);
             float weight = 1.0 / (distance + epsilon);
 
-            if (shape_type == 0 && hit_index < circle_count) {
-                Circle circle = circles[hit_index];
-                if (distance < circle.radius) {
-                    accumulated_color += circle.color * weight;
-                }
-            } else if (shape_type == 1 && hit_index < line_count) {
-                Line line = lines[hit_index];
-                vec2 line_dir = normalize(line.end_point - line.start_point);
-                vec2 line_normal = vec2(-line_dir.y, line_dir.x);
-                float projection = dot(intersection - line.start_point, line_dir);
+            Line line = lines[hit_index];
+            vec2 line_dir = normalize(line.end_point - line.start_point);
+            vec2 line_normal = vec2(-line_dir.y, line_dir.x);
+            float projection = dot(intersection - line.start_point, line_dir);
 
-                if (projection >= 0 && projection <= length(line.end_point - line.start_point)) {
-                    vec4 color = dot(intersection - line.start_point, line_normal) < 0 ? line.color_right[0] : line.color_left[0];
-                    accumulated_color += color * weight;
-                }
+            if (projection >= 0 && projection <= length(line.end_point - line.start_point)) {
+                vec4 color = dot(intersection - line.start_point, line_normal) < 0 ? line.color_right[0] : line.color_left[0];
+                accumulated_color += color * weight;
             }
+
         }
-
         outColor = accumulated_color;
-
     }
 
 }

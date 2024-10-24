@@ -253,6 +253,11 @@ int main() {
 	//Keep track of the frame nr for the random number generator
 	unsigned int frame_nr = 0;
 
+    std::vector<std::string> diff_curve_files;
+    for (const auto& entry : std::filesystem::directory_iterator(xml_folder)) {
+        diff_curve_files.push_back(entry.path().filename().string());
+    }
+
 	while (!pWindow->shouldClose()) {
 		pWindow->updateInput();
 
@@ -396,13 +401,31 @@ int main() {
                 randomize_circles(circles, number_of_circles, circle_seed);
             }
 
-            //Text input for the diffusion curve file selector
-            ImGui::InputText("Diffusioncurve file", file_name_buffer, file_name_buffer_size);
-            if (ImGui::Button("Reload diffusion curves")) {
-                reset_accumulator = true;
-                reset_rasterize = true;
-                redo_lines = true;
+//            //Text input for the diffusion curve file selector
+//            ImGui::InputText("Diffusioncurve file", file_name_buffer, file_name_buffer_size);
+//            if (ImGui::Button("Reload diffusion curves")) {
+//                reset_accumulator = true;
+//                reset_rasterize = true;
+//                redo_lines = true;
+//            }
+
+            //Drop down menu to select the file
+            if (ImGui::BeginCombo("Diffusioncurve file", file_name_buffer)) {
+                for (const auto& file : diff_curve_files) {
+                    bool is_selected = (file == file_name_buffer);
+                    if (ImGui::Selectable(file.c_str(), is_selected)) {
+                        strncpy(file_name_buffer, file.c_str(), file_name_buffer_size);
+                        reset_accumulator = true;
+                        reset_rasterize = true;
+                        redo_lines = true;
+                    }
+                    if (is_selected) {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
             }
+
             
             //Maximum level of subdivision of bezier curves into lines, after subdividing on color control points.
             if (ImGui::SliderInt("maximum diffusion curve subdivision", &max_curve_subdivision, 0, 10)) {

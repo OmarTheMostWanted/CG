@@ -71,16 +71,17 @@ void main()
             float distance_to_line = abs(dot(pixel_center - line.start_point, line_normal));
             float projection = dot(pixel_center - line.start_point, line_dir);
 
-            if (distance_to_line <= rasterize_width && projection >= 0 && projection <= line_length) {
-                shape_id = i;
-                break;
-            }
-
             // Check round caps at the ends
             if (length(pixel_center - line.start_point) <= rasterize_width || length(pixel_center - line.end_point) <= rasterize_width) {
                 shape_id = i;
                 break;
             }
+
+            if (distance_to_line <= rasterize_width && projection >= 0 && projection <= line_length) {
+                shape_id = i;
+                break;
+            }
+
         }
     }
 }
