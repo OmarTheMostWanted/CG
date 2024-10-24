@@ -59,7 +59,7 @@ uniform float step_size;
 uniform uint max_raymarch_iter;
 
 // Small epsilon to avoid division by zero
-const float epsilon = 1e-3;
+const float epsilon = 1e-4;
 
 //Random number generator outputs numbers between [0-1]
 float get_random_numbers(inout uint seed) {

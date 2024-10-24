@@ -255,7 +255,8 @@ int main() {
 
     std::vector<std::string> diff_curve_files;
     for (const auto& entry : std::filesystem::directory_iterator(xml_folder)) {
-        diff_curve_files.push_back(entry.path().filename().string());
+        if (entry.path().extension() == ".xml")
+            diff_curve_files.push_back(entry.path().filename().string());
     }
 
 	while (!pWindow->shouldClose()) {
