@@ -539,6 +539,25 @@ void keyboard(int key, int /* scancode */, int  action , int /* mods */) {
     if (key == '\\' && action == GLFW_PRESS) {
         debug_menu_on = !debug_menu_on;
     }
+
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        pWindow->close();
+    }
+
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        paused = !paused;
+    }
+
+    //step size controls
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        step_size  = std::min(step_size + 0.05f, 2.0f);
+    }
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+        step_size = std::max(step_size - 0.05f, 0.0f);
+    }
+
+
+
 }
 
 void reshape(const glm::ivec2& size) {

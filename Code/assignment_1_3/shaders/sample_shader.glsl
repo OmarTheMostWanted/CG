@@ -93,19 +93,28 @@ vec2 march_ray_circle(vec2 origin, vec2 direction, float step_size) {
 
 vec2 march_ray_line(vec2 origin, vec2 direction, out int hit_index) {
     vec2 current_position = origin;
+    hit_index = -1;
     for (uint i = 0; i < max_raymarch_iter; ++i) {
         ivec2 tex_coords = ivec2(current_position);
         if (tex_coords.x < 0 || tex_coords.x >= screen_dimensions.x || tex_coords.y < 0 || tex_coords.y >= screen_dimensions.y) {
             break;
         }
-        int index = texelFetch(rasterized_texture, tex_coords, 0).r;
-        if (index >= 0) {
-            hit_index = index;
-            return current_position;
+        int line_index = texelFetch(rasterized_texture, tex_coords, 0).r;
+        if (line_index >= 0 && line_index < line_count) {
+            Line line = lines[line_index];
+            vec2 line_dir = normalize(line.end_point - line.start_point);
+            vec2 line_normal = vec2(-line_dir.y, line_dir.x);
+            float distance_to_line = abs(dot(current_position - line.start_point, line_normal));
+            float projection = dot(current_position - line.start_point, line_dir);
+            float line_length = length(line.end_point - line.start_point);
+
+            if (distance_to_line <= step_size && projection >= 0 && projection <= line_length) {
+                hit_index = line_index;
+                return current_position;
+            }
         }
         current_position += direction * step_size;
     }
-    hit_index = -1;
     return current_position;
 }
 
@@ -157,21 +166,42 @@ void main()
         vec4 accumulated_color = texelFetch(accumulator_texture, ivec2(gl_FragCoord.xy), 0);
 
         if (hit_index >= 0) {
-            float distance = length(origin - intersection);
-            float weight = 1.0 / (distance + epsilon);
 
             Line line = lines[hit_index];
+            float distance = length(origin - intersection);
+            float weight = 1.0 / (distance + epsilon);
             vec2 line_dir = normalize(line.end_point - line.start_point);
             vec2 line_normal = vec2(-line_dir.y, line_dir.x);
-            float projection = dot(intersection - line.start_point, line_dir);
+            float side = dot(gl_FragCoord.xy - line.start_point, line_normal);
 
-            if (projection >= 0 && projection <= length(line.end_point - line.start_point)) {
-                vec4 color = dot(intersection - line.start_point, line_normal) < 0 ? line.color_right[0] : line.color_left[0];
-                accumulated_color += color * weight;
+            if (side < 0) {
+                accumulated_color += line.color_right[0] * weight;
+            } else if (side > 0) {
+                accumulated_color += line.color_left[0] * weight;
+            }else {
+                accumulated_color += ((line.color_right[0] + line.color_left[0])/2) * weight;
             }
-
         }
         outColor = accumulated_color;
+//        int hit_index;
+//        vec2 intersection = march_ray_line(origin, direction, hit_index);
+//
+//        // Initialize the output color
+//        vec4 accumulated_color = texelFetch(accumulator_texture, ivec2(gl_FragCoord.xy), 0);
+//
+//        if (hit_index >= 0) {
+//            float distance = length(origin - intersection);
+//            float weight = 1.0 / (distance + epsilon);
+//            Line line = lines[hit_index];
+//            vec2 line_dir = normalize(line.end_point - line.start_point);
+//            vec2 line_normal = vec2(-line_dir.y, line_dir.x);
+//            float projection = dot(intersection - line.start_point, line_dir);
+//            if (projection >= 0 && projection <= length(line.end_point - line.start_point)) {
+//                vec4 color = dot(intersection - line.start_point, line_normal) < 0 ? line.color_right[0] : line.color_left[0];
+//                accumulated_color += color * weight;
+//            }
+//        }
+//        outColor = accumulated_color;
     }
 
 }
